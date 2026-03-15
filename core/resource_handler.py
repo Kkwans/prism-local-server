@@ -68,8 +68,19 @@ class ResourceHandler(SimpleHTTPRequestHandler):
     - 文件缓冲读取
     """
     
-    # 部署目录（由HTTPServerManager设置）
-    deployment_directory = None
+    def __init__(self, *args, directory=None, **kwargs):
+        """
+        初始化资源处理器
+        
+        参数:
+            directory: 部署目录路径
+        """
+        # 如果没有传递directory参数,使用类变量
+        if directory is None and hasattr(self.__class__, 'deployment_directory'):
+            directory = self.__class__.deployment_directory
+        
+        # 调用父类初始化
+        super().__init__(*args, directory=directory, **kwargs)
     
     def setup(self):
         """
@@ -99,37 +110,12 @@ class ResourceHandler(SimpleHTTPRequestHandler):
         - 保持相对路径一致性
         - 支持中文和特殊字符
         - 防止目录遍历攻击
+        
+        注意: 父类SimpleHTTPRequestHandler已经处理了directory参数
         """
-        # URL解码
-        path = urllib.parse.unquote(path)
-        
-        # 移除查询参数
-        path = path.split('?', 1)[0]
-        path = path.split('#', 1)[0]
-        
-        # 规范化路径，移除开头的斜杠
-        path = path.lstrip('/')
-        
-        # 使用部署目录作为根目录
-        if self.deployment_directory:
-            base_dir = Path(self.deployment_directory).resolve()
-        else:
-            base_dir = Path.cwd()
-        
-        # 拼接完整路径
-        full_path = base_dir / path
-        
-        # 安全检查：确保路径在部署目录内（防止目录遍历攻击）
-        try:
-            full_path = full_path.resolve()
-            if not str(full_path).startswith(str(base_dir)):
-                print(f"安全警告：尝试访问部署目录外的文件: {path}")
-                return str(base_dir)
-        except Exception as e:
-            print(f"路径解析失败: {e}")
-            return str(base_dir)
-        
-        return str(full_path)
+        # 直接使用父类的translate_path方法
+        # 父类会自动使用__init__中传递的directory参数
+        return super().translate_path(path)
     
     def guess_type(self, path: str) -> str:
         """
@@ -166,15 +152,26 @@ class ResourceHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "File not found")
             return
         
-        # 如果是目录，尝试查找index.html
+        # 如果是目录，尝试查找HTML文件
         if os.path.isdir(file_path):
+            # 优先查找index.html
             index_path = os.path.join(file_path, 'index.html')
             if os.path.exists(index_path):
                 file_path = index_path
             else:
-                # 返回目录列表
-                SimpleHTTPRequestHandler.do_GET(self)
-                return
+                # 查找messages.html
+                messages_path = os.path.join(file_path, 'messages.html')
+                if os.path.exists(messages_path):
+                    file_path = messages_path
+                else:
+                    # 查找任何HTML文件
+                    html_files = [f for f in os.listdir(file_path) if f.endswith(('.html', '.htm'))]
+                    if html_files:
+                        file_path = os.path.join(file_path, html_files[0])
+                    else:
+                        # 没有HTML文件，返回404
+                        self.send_error(404, "No HTML file found in directory")
+                        return
         
         # 获取文件大小
         try:

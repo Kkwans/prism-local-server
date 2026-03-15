@@ -195,7 +195,7 @@ class MainWindow(ctk.CTk):
         if not self.current_directory:
             self.current_directory = os.getcwd()
         
-        self.current_port = self.config.get('default_port', 8888)
+        self.current_port = self.config.get('default_port', 9000)
         self.current_html = self.config.get('default_html', 'index.html')
     
     def _selectDirectory(self):

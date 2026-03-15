@@ -159,7 +159,7 @@ class HTTPServerManager:
         # 未找到HTML文件
         raise NoHTMLFileError(f"目录下未找到HTML文件: {directory}")
     
-    def startService(self, directory: str, port: int = 8888, 
+    def startService(self, directory: str, port: int = 9000, 
                     entry_html: str = "index.html", 
                     auto_open_browser: bool = True) -> ServiceInstance:
         """
@@ -214,12 +214,13 @@ class HTTPServerManager:
             status="starting"
         )
         
-        # 设置资源处理器的部署目录
-        ResourceHandler.deployment_directory = directory
-        
         # 创建HTTP服务器
         try:
             server_address = ('0.0.0.0', available_port)
+            
+            # 设置ResourceHandler的部署目录（使用类变量）
+            ResourceHandler.deployment_directory = directory
+            
             httpd = ThreadingHTTPServer(server_address, ResourceHandler)
             httpd.allow_reuse_address = True
             service.server = httpd

@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 # 默认配置常量
-DEFAULT_PORT = 8888  # 默认端口号
+DEFAULT_PORT = 9000  # 默认端口号（避免8888端口权限问题）
 DEFAULT_DIRECTORY = ""  # 默认部署目录（空表示EXE所在目录）
 DEFAULT_HTML = "index.html"  # 默认入口HTML文件
 DEFAULT_THEME = "system"  # 默认主题（system/light/dark）
