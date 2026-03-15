@@ -1,0 +1,14 @@
+# UI框架
+customtkinter>=5.2.0
+
+# 系统托盘
+pystray>=0.19.0
+
+# 图像处理
+Pillow>=10.0.0
+
+# 系统信息
+psutil>=5.9.0
+
+# 打包工具
+pyinstaller>=6.0.0
