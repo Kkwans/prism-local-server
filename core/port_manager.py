@@ -58,7 +58,7 @@ class PortManager:
         try:
             # 创建TCP socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # 不使用SO_REUSEADDR，确保准确检测端口占用
             
             # 尝试绑定端口
             sock.bind(('0.0.0.0', port))

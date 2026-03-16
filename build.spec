@@ -54,6 +54,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # TODO: 添加应用图标
+    icon='assets/icon.ico',  # 应用图标
     version_file=None,
 )
