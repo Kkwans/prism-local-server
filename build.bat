@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 REM Prism Local Server 打包脚本
 REM 作者: Kkwans
 REM 创建时间: 2026-03-16

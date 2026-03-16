@@ -48,6 +48,8 @@ desktop.ini
 .pytest_cache/
 .coverage
 htmlcov/
+test_*.py
+create_icon.py
 
 # 临时文件
 *.tmp

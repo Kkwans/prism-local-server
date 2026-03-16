@@ -4,24 +4,38 @@ PyInstaller打包配置文件
 用于将Flet应用打包为独立的Windows EXE
 作者: Kkwans
 创建时间: 2026-03-16
+修改时间: 2026-03-16 (修复Flet打包问题)
 """
 
+import sys
+import os
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
 block_cipher = None
+
+# Flet 需要的数据文件和子模块
+flet_datas = collect_data_files('flet')
+flet_hiddenimports = collect_submodules('flet')
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=flet_datas,  # 添加 Flet 数据文件
     hiddenimports=[
         'flet',
+        'flet.core',
+        'flet.utils',
+        'flet_core',
+        'flet_runtime',
         'httpx',
         'oauthlib',
         'repath',
         'msgpack',
         'pystray',
         'PIL',
-    ],
+        'PIL._imaging',
+    ] + flet_hiddenimports,  # 添加 Flet 所有子模块
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

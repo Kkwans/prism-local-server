@@ -81,22 +81,32 @@ build.bat
 
 ```
 prism-server-flet/
-├── main.py                 # 应用入口
-├── core/                   # 核心模块
-│   ├── config_manager.py   # 配置管理
-│   ├── http_server_manager.py  # HTTP服务管理
-│   ├── port_manager.py     # 端口管理
-│   └── resource_handler.py # 资源处理器
-├── ui/                     # UI模块
-│   ├── home_view.py        # 主页视图
-│   ├── settings_dialog.py  # 设置对话框
-│   └── tray_manager.py     # 系统托盘
-├── utils/                  # 工具模块
-│   ├── logger.py           # 日志工具
-│   └── network_utils.py    # 网络工具
-├── requirements.txt        # 依赖列表
-├── build.spec             # PyInstaller配置
-└── build.bat              # 打包脚本
+├── main.py                     # 应用入口
+├── core/                       # 核心业务逻辑
+│   ├── config_manager.py       # 配置管理（用户目录存储）
+│   ├── http_server_manager.py  # HTTP服务管理（多实例）
+│   ├── port_manager.py         # 端口管理（自动检测）
+│   └── resource_handler.py     # 资源处理器（Range支持）
+├── ui/                         # UI层
+│   ├── home_view.py            # 主页视图（Material Design 3）
+│   ├── settings_dialog.py      # 设置对话框
+│   └── tray_manager.py         # 系统托盘管理
+├── utils/                      # 工具模块
+│   ├── logger.py               # 日志工具
+│   └── network_utils.py        # 网络工具
+├── assets/                     # 资源文件
+│   ├── icon.ico                # 应用图标
+│   └── icon.png                # 托盘图标
+├── docs/                       # 项目文档
+│   ├── 项目总结.md
+│   ├── 用户指南.md
+│   ├── 开发文档.md
+│   └── ...
+├── test_demo/                  # 测试资源
+├── requirements.txt            # 依赖列表
+├── build.spec                  # PyInstaller配置
+├── build.bat                   # 打包脚本
+└── README.md                   # 项目说明
 ```
 
 ## 作者
