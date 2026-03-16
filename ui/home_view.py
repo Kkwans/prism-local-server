@@ -203,7 +203,7 @@ class HomeView(ft.Container):
                 spacing=10
             ),
             padding=ft.padding.only(top=80),
-            alignment=ft.alignment.center
+            alignment=ft.alignment.Alignment(0, 0)
         )
         
         # 创建UI
