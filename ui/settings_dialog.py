@@ -6,7 +6,6 @@
 """
 
 import flet as ft
-from flet import Colors
 from core.config_manager import ConfigManager
 from utils.logger import Logger
 
@@ -118,8 +117,8 @@ class SettingsDialog:
     def _show_error(self, message: str):
         """显示错误提示"""
         snackbar = ft.SnackBar(
-            content=ft.Text(message, color=Colors.WHITE),
-            bgcolor=Colors.RED_600
+            content=ft.Text(message, color="white"),
+            bgcolor="red600"
         )
         self.page.snack_bar = snackbar
         snackbar.open = True

@@ -7,7 +7,6 @@ Prism Local Server - Flet版本
 """
 
 import flet as ft
-from flet import Colors
 import sys
 from pathlib import Path
 
@@ -38,7 +37,7 @@ class PrismApp:
         
         # 设置Material 3主题
         self.page.theme = ft.Theme(
-            color_scheme_seed=Colors.BLUE,
+            color_scheme_seed="blue",
             use_material3=True
         )
         
