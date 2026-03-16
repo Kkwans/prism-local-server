@@ -183,7 +183,7 @@ class HomeView(ft.Container):
             content=ft.Column(
                 controls=[
                     ft.Icon(
-                        ft.icons.CLOUD_QUEUE_OUTLINED,
+                        ft.icons.CLOUD_OUTLINED,
                         size=80,
                         color=Colors.GREY_400
                     ),

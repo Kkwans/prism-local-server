@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-创建现代化的Prism图标
-使用渐变色和Material Design风格
+创建现代化应用图标
+生成高质量的多尺寸 ICO 文件
 作者: Kkwans
 创建时间: 2026-03-16
 """
 
 from PIL import Image, ImageDraw
 import os
+import math
 
 def create_modern_icon():
-    """创建现代化的Prism图标"""
+    """创建现代化的六边形图标（多尺寸）"""
     
     # 创建多个尺寸的图标
-    sizes = [16, 32, 48, 64, 128, 256]
+    sizes = [16, 24, 32, 48, 64, 128, 256]
     images = []
     
     for size in sizes:
@@ -21,70 +22,54 @@ def create_modern_icon():
         img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        # 计算尺寸
-        padding = size // 8
-        center_x = size // 2
-        center_y = size // 2
+        # 计算六边形顶点（棱镜形状）
+        center_x, center_y = size // 2, size // 2
+        radius = size * 0.4
         
-        # 绘制六边形（棱镜形状）
-        hex_size = size - padding * 2
-        hex_radius = hex_size // 2
-        
-        # 六边形顶点
-        import math
+        # 六边形的6个顶点
         points = []
         for i in range(6):
             angle = math.pi / 3 * i - math.pi / 6
-            x = center_x + hex_radius * math.cos(angle)
-            y = center_y + hex_radius * math.sin(angle)
+            x = center_x + radius * math.cos(angle)
+            y = center_y + radius * math.sin(angle)
             points.append((x, y))
         
-        # 绘制渐变背景（模拟）
-        # 使用蓝色到紫色的渐变
-        colors = [
-            (33, 150, 243, 255),   # 蓝色
-            (103, 58, 183, 255),   # 紫色
-        ]
+        # 绘制六边形外框（蓝紫色）
+        main_color = (91, 127, 255, 255)
+        draw.polygon(points, fill=main_color, outline=(70, 100, 230, 255))
         
-        # 绘制六边形主体
-        draw.polygon(points, fill=(63, 81, 181, 255), outline=(33, 150, 243, 255))
-        
-        # 绘制内部三角形（棱镜效果）
-        triangle_size = hex_radius * 0.6
-        triangle_points = [
-            (center_x, center_y - triangle_size),
-            (center_x - triangle_size * 0.866, center_y + triangle_size * 0.5),
-            (center_x + triangle_size * 0.866, center_y + triangle_size * 0.5),
-        ]
-        draw.polygon(triangle_points, fill=(255, 255, 255, 200))
-        
-        # 绘制光线效果
-        line_width = max(1, size // 32)
+        # 绘制内部三角形（光线效果）
+        inner_radius = radius * 0.5
+        inner_points = []
         for i in range(3):
             angle = math.pi * 2 / 3 * i
-            start_x = center_x + triangle_size * 0.3 * math.cos(angle)
-            start_y = center_y + triangle_size * 0.3 * math.sin(angle)
-            end_x = center_x + hex_radius * 0.8 * math.cos(angle)
-            end_y = center_y + hex_radius * 0.8 * math.sin(angle)
-            draw.line([(start_x, start_y), (end_x, end_y)], 
-                     fill=(255, 255, 255, 150), width=line_width)
+            x = center_x + inner_radius * math.cos(angle)
+            y = center_y + inner_radius * math.sin(angle)
+            inner_points.append((x, y))
+        
+        # 内部三角形使用浅色
+        light_color = (150, 180, 255, 200)
+        draw.polygon(inner_points, fill=light_color)
         
         images.append(img)
     
-    # 保存为PNG（用于Flet）
-    images[-1].save('assets/icon.png', 'PNG')
-    print(f"✓ 已创建 PNG 图标: assets/icon.png")
+    # 保存为 PNG（最高分辨率）
+    png_path = 'assets/icon.png'
+    images[-1].save(png_path, 'PNG')
+    print(f"✓ PNG 图标已保存: {png_path} (256x256)")
     
-    # 保存为ICO（用于Windows）
-    images[0].save('assets/icon.ico', format='ICO', 
-                   sizes=[(s, s) for s in sizes])
-    print(f"✓ 已创建 ICO 图标: assets/icon.ico")
+    # 保存为 ICO（包含所有尺寸）
+    ico_path = 'assets/icon.ico'
+    images[0].save(ico_path, format='ICO', sizes=[(img.width, img.height) for img in images])
+    print(f"✓ ICO 图标已保存: {ico_path}")
+    print(f"  包含尺寸: {', '.join(f'{s}x{s}' for s in sizes)}")
     
     print("\n图标创建完成！")
-    print("- PNG图标用于Flet打包")
-    print("- ICO图标用于Windows应用")
+    print("- PNG 用于高分辨率显示（任务栏、窗口标题栏）")
+    print("- ICO 包含多个尺寸，适配不同显示场景")
 
 if __name__ == '__main__':
-    # 确保assets目录存在
+    # 确保 assets 目录存在
     os.makedirs('assets', exist_ok=True)
+    
     create_modern_icon()
