@@ -7,6 +7,7 @@
 """
 
 import flet as ft
+from flet import colors
 import os
 import webbrowser
 from typing import Dict, Optional
@@ -32,7 +33,7 @@ class ServiceCard(ft.Container):
         self.uptime_text = ft.Text(
             f"运行时长: {service.getUptime()}",
             size=12,
-            color=ft.colors.GREY_600
+            color=colors.GREY_600
         )
         
         # 创建卡片内容
@@ -48,14 +49,14 @@ class ServiceCard(ft.Container):
                                     controls=[
                                         ft.Icon(
                                             ft.icons.CIRCLE,
-                                            color=ft.colors.GREEN_600,
+                                            color=colors.GREEN_600,
                                             size=12
                                         ),
                                         ft.Text(
                                             "运行中",
                                             size=14,
                                             weight=ft.FontWeight.BOLD,
-                                            color=ft.colors.GREEN_700
+                                            color=colors.GREEN_700
                                         ),
                                         ft.Container(width=10),
                                         ft.Text(
@@ -74,12 +75,12 @@ class ServiceCard(ft.Container):
                                         ft.Icon(
                                             ft.icons.FOLDER_OUTLINED,
                                             size=16,
-                                            color=ft.colors.GREY_600
+                                            color=colors.GREY_600
                                         ),
                                         ft.Text(
                                             service.directory,
                                             size=12,
-                                            color=ft.colors.GREY_700
+                                            color=colors.GREY_700
                                         )
                                     ],
                                     spacing=5
@@ -90,12 +91,12 @@ class ServiceCard(ft.Container):
                                         ft.Icon(
                                             ft.icons.LANGUAGE,
                                             size=16,
-                                            color=ft.colors.BLUE_600
+                                            color=colors.BLUE_600
                                         ),
                                         ft.Text(
                                             NetworkUtils.generateLocalURL(service.port, service.entry_html),
                                             size=12,
-                                            color=ft.colors.BLUE_700
+                                            color=colors.BLUE_700
                                         )
                                     ],
                                     spacing=5
@@ -120,8 +121,8 @@ class ServiceCard(ft.Container):
                                     icon=ft.icons.STOP,
                                     on_click=lambda _: self.on_stop(service.id),
                                     style=ft.ButtonStyle(
-                                        bgcolor=ft.colors.RED_600,
-                                        color=ft.colors.WHITE
+                                        bgcolor=colors.RED_600,
+                                        color=colors.WHITE
                                     )
                                 )
                             ],
@@ -132,7 +133,7 @@ class ServiceCard(ft.Container):
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             ),
-            bgcolor=ft.colors.SURFACE_VARIANT,
+            bgcolor=colors.SURFACE_VARIANT,
             border_radius=12,
             margin=ft.margin.only(bottom=12),
             animate=ft.animation.Animation(300, ft.AnimationCurve.EASE_OUT)
@@ -166,7 +167,7 @@ class HomeView(ft.Container):
         self.service_count_text = ft.Text(
             "(0)",
             size=14,
-            color=ft.colors.GREY_600
+            color=colors.GREY_600
         )
         
         # 服务列表容器
@@ -183,18 +184,18 @@ class HomeView(ft.Container):
                     ft.Icon(
                         ft.icons.CLOUD_QUEUE_OUTLINED,
                         size=80,
-                        color=ft.colors.GREY_400
+                        color=colors.GREY_400
                     ),
                     ft.Text(
                         "暂无运行中的服务",
                         size=18,
-                        color=ft.colors.GREY_600,
+                        color=colors.GREY_600,
                         weight=ft.FontWeight.W_500
                     ),
                     ft.Text(
                         "点击\"启动服务\"按钮开始",
                         size=14,
-                        color=ft.colors.GREY_500
+                        color=colors.GREY_500
                     )
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -219,7 +220,7 @@ class HomeView(ft.Container):
                 expand=True
             ),
             expand=True,
-            bgcolor=ft.colors.BACKGROUND
+            bgcolor=colors.BACKGROUND
         )
         
         # 启动定时器更新运行时长
@@ -233,7 +234,7 @@ class HomeView(ft.Container):
                     ft.Icon(
                         ft.icons.HEXAGON,
                         size=32,
-                        color=ft.colors.BLUE_600
+                        color=colors.BLUE_600
                     ),
                     ft.Text(
                         "Prism Local Server",
@@ -254,7 +255,7 @@ class HomeView(ft.Container):
                 ],
                 alignment=ft.MainAxisAlignment.START
             ),
-            bgcolor=ft.colors.SURFACE_VARIANT,
+            bgcolor=colors.SURFACE_VARIANT,
             padding=ft.padding.symmetric(horizontal=24, vertical=16)
         )
     
@@ -290,7 +291,7 @@ class HomeView(ft.Container):
                 spacing=0
             ),
             padding=ft.padding.all(24),
-            bgcolor=ft.colors.SURFACE,
+            bgcolor=colors.SURFACE,
             border_radius=16,
             margin=ft.margin.all(24)
         )
@@ -337,7 +338,7 @@ class HomeView(ft.Container):
             if result.path:
                 self.current_directory = result.path
                 Logger.info(f"选择目录: {result.path}")
-                self._show_snackbar(f"已选择目录: {result.path}", ft.colors.GREEN_600)
+                self._show_snackbar(f"已选择目录: {result.path}", colors.GREEN_600)
         
         file_picker = ft.FilePicker(on_result=on_result)
         self.page.overlay.append(file_picker)
@@ -360,13 +361,13 @@ class HomeView(ft.Container):
             
             # 显示成功消息
             local_url = NetworkUtils.generateLocalURL(service.port, service.entry_html)
-            self._show_snackbar(f"服务启动成功！端口: {service.port}", ft.colors.GREEN_600)
+            self._show_snackbar(f"服务启动成功！端口: {service.port}", colors.GREEN_600)
             
             Logger.info(f"服务启动成功: 端口{service.port}")
         
         except Exception as ex:
             Logger.exception(f"启动服务失败: {ex}")
-            self._show_snackbar(f"启动服务失败: {str(ex)}", ft.colors.RED_600)
+            self._show_snackbar(f"启动服务失败: {str(ex)}", colors.RED_600)
     
     def _add_service_card(self, service: ServiceInstance):
         """添加服务卡片"""
@@ -414,15 +415,15 @@ class HomeView(ft.Container):
                     if len(self.service_cards) == 0:
                         self.empty_state.visible = True
                     
-                    self._show_snackbar("服务已停止", ft.colors.GREEN_600)
+                    self._show_snackbar("服务已停止", colors.GREEN_600)
                     Logger.info(f"服务已停止: {service_id}")
                     self.page.update()
                 else:
-                    self._show_snackbar("停止服务失败", ft.colors.RED_600)
+                    self._show_snackbar("停止服务失败", colors.RED_600)
             
             except Exception as ex:
                 Logger.exception(f"停止服务失败: {ex}")
-                self._show_snackbar(f"停止服务失败: {str(ex)}", ft.colors.RED_600)
+                self._show_snackbar(f"停止服务失败: {str(ex)}", colors.RED_600)
         
         def cancel_stop(e):
             dialog.open = False
@@ -449,7 +450,7 @@ class HomeView(ft.Container):
         url = NetworkUtils.generateLocalURL(service.port, service.entry_html)
         webbrowser.open(url)
         Logger.info(f"打开浏览器: {url}")
-        self._show_snackbar(f"已打开浏览器", ft.colors.BLUE_600)
+        self._show_snackbar(f"已打开浏览器", colors.BLUE_600)
     
     def _update_service_count(self):
         """更新服务计数"""
@@ -482,7 +483,7 @@ class HomeView(ft.Container):
             self.config = self.config_manager.loadConfig()
             self.current_port = self.config.get('default_port', 9000)
             self.current_html = self.config.get('default_html', 'index.html')
-            self._show_snackbar("设置已保存", ft.colors.GREEN_600)
+            self._show_snackbar("设置已保存", colors.GREEN_600)
         
         dialog = SettingsDialog(self.page, self.config_manager, on_save)
         dialog.show()
@@ -502,7 +503,7 @@ class HomeView(ft.Container):
                     ft.Text("基于 Flet (Flutter) 构建", size=14),
                     ft.Text("作者: Kkwans", size=14),
                     ft.Text("", size=14),
-                    ft.Text("一个现代化的前端静态文件部署工具", size=12, color=ft.colors.GREY_600)
+                    ft.Text("一个现代化的前端静态文件部署工具", size=12, color=colors.GREY_600)
                 ],
                 spacing=8,
                 tight=True
@@ -520,7 +521,7 @@ class HomeView(ft.Container):
     def _show_snackbar(self, message: str, bgcolor: str):
         """显示Snackbar提示"""
         snackbar = ft.SnackBar(
-            content=ft.Text(message, color=ft.colors.WHITE),
+            content=ft.Text(message, color=colors.WHITE),
             bgcolor=bgcolor,
             duration=3000
         )
