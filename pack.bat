@@ -49,7 +49,7 @@ echo.
 echo [3/3] 打包完成！
 echo EXE文件位置: dist\PrismLocalServer.exe
 echo.
-echo 提示：首次运行可能需要下载Flet运行时组件
+echo 提示: 首次运行可能需要下载Flet运行时组件
 echo.
 
 pause
