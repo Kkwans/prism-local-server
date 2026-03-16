@@ -183,7 +183,7 @@ class HomeView(ft.Container):
             content=ft.Column(
                 controls=[
                     ft.Icon(
-                        ft.icons.CLOUD,
+                        "inbox",
                         size=80,
                         color=Colors.GREY_400
                     ),
