@@ -31,7 +31,7 @@ echo [2/3] 开始打包（使用Flet官方工具）...
 echo 这可能需要几分钟，请耐心等待...
 echo.
 
-flet pack main.py --name "PrismLocalServer" --icon assets/icon.png --add-data "assets;assets"
+flet pack main.py --name "PrismLocalServer" --icon assets/icon.ico --add-data "assets;assets"
 
 if errorlevel 1 (
     echo.
@@ -47,9 +47,9 @@ if errorlevel 1 (
 
 echo.
 echo [3/3] 打包完成！
-echo EXE文件位置: dist\PrismLocalServer.exe
+echo EXE文件位置：dist\PrismLocalServer.exe
 echo.
-echo 提示: 首次运行可能需要下载Flet运行时组件
+echo 提示：首次运行可能需要下载Flet运行时组件
 echo.
 
 pause
