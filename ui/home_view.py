@@ -150,35 +150,36 @@ class HomeView(ft.Container):
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, server_manager: HTTPServerManager):
         """初始化主页视图"""
-        self.page = page
-        self.config_manager = config_manager
-        self.server_manager = server_manager
+        # 先保存引用到私有变量
+        self._page = page
+        self._config_manager = config_manager
+        self._server_manager = server_manager
         
         # 加载配置
-        self.config = config_manager.loadConfig()
-        self.current_directory = self.config.get('default_directory', '') or os.getcwd()
-        self.current_port = self.config.get('default_port', 9000)
-        self.current_html = self.config.get('default_html', 'index.html')
+        self._config = config_manager.loadConfig()
+        self._current_directory = self._config.get('default_directory', '') or os.getcwd()
+        self._current_port = self._config.get('default_port', 9000)
+        self._current_html = self._config.get('default_html', 'index.html')
         
         # 服务卡片字典
-        self.service_cards: Dict[str, ServiceCard] = {}
+        self._service_cards: Dict[str, ServiceCard] = {}
         
         # 服务计数文本
-        self.service_count_text = ft.Text(
+        self._service_count_text = ft.Text(
             "(0)",
             size=14,
             color=Colors.GREY_600
         )
         
         # 服务列表容器
-        self.service_list = ft.Column(
+        self._service_list = ft.Column(
             controls=[],
             spacing=0,
             scroll=ft.ScrollMode.AUTO
         )
         
         # 空状态提示
-        self.empty_state = ft.Container(
+        self._empty_state = ft.Container(
             content=ft.Column(
                 controls=[
                     ft.Icon(
@@ -309,7 +310,7 @@ class HomeView(ft.Container):
                                 size=18,
                                 weight=ft.FontWeight.BOLD
                             ),
-                            self.service_count_text
+                            self._service_count_text
                         ],
                         spacing=8
                     ),
@@ -318,8 +319,8 @@ class HomeView(ft.Container):
                     ft.Container(
                         content=ft.Stack(
                             controls=[
-                                self.service_list,
-                                self.empty_state
+                                self._service_list,
+                                self._empty_state
                             ]
                         ),
                         expand=True
@@ -336,23 +337,23 @@ class HomeView(ft.Container):
         """选择部署目录"""
         def on_result(result: ft.FilePickerResultEvent):
             if result.path:
-                self.current_directory = result.path
+                self._current_directory = result.path
                 Logger.info(f"选择目录: {result.path}")
                 self._show_snackbar(f"已选择目录: {result.path}", Colors.GREEN_600)
         
         file_picker = ft.FilePicker(on_result=on_result)
-        self.page.overlay.append(file_picker)
-        self.page.update()
-        file_picker.get_directory_path(initial_directory=self.current_directory)
+        self._page.overlay.append(file_picker)
+        self._page.update()
+        file_picker.get_directory_path(initial_directory=self._current_directory)
     
     def _start_service(self, e):
         """启动HTTP服务"""
         try:
             # 启动服务
-            service = self.server_manager.startService(
-                directory=self.current_directory,
-                port=self.current_port,
-                entry_html=self.current_html,
+            service = self._server_manager.startService(
+                directory=self._current_directory,
+                port=self._current_port,
+                entry_html=self._current_html,
                 auto_open_browser=True
             )
             
@@ -372,7 +373,7 @@ class HomeView(ft.Container):
     def _add_service_card(self, service: ServiceInstance):
         """添加服务卡片"""
         # 隐藏空状态
-        self.empty_state.visible = False
+        self._empty_state.visible = False
         
         # 创建服务卡片
         card = ServiceCard(
@@ -382,42 +383,42 @@ class HomeView(ft.Container):
         )
         
         # 添加到列表
-        self.service_list.controls.append(card)
-        self.service_cards[service.id] = card
+        self._service_list.controls.append(card)
+        self._service_cards[service.id] = card
         
         # 更新服务计数
         self._update_service_count()
         
         # 更新UI
-        self.page.update()
+        self._page.update()
     
     def _stop_service(self, service_id: str):
         """停止服务"""
         def confirm_stop(e):
             dialog.open = False
-            self.page.update()
+            self._page.update()
             
             try:
                 # 停止服务
-                success = self.server_manager.stopService(service_id)
+                success = self._server_manager.stopService(service_id)
                 
                 if success:
                     # 从UI中移除
-                    if service_id in self.service_cards:
-                        card = self.service_cards[service_id]
-                        self.service_list.controls.remove(card)
-                        del self.service_cards[service_id]
+                    if service_id in self._service_cards:
+                        card = self._service_cards[service_id]
+                        self._service_list.controls.remove(card)
+                        del self._service_cards[service_id]
                     
                     # 更新服务计数
                     self._update_service_count()
                     
                     # 如果没有服务了，显示空状态
-                    if len(self.service_cards) == 0:
-                        self.empty_state.visible = True
+                    if len(self._service_cards) == 0:
+                        self._empty_state.visible = True
                     
                     self._show_snackbar("服务已停止", Colors.GREEN_600)
                     Logger.info(f"服务已停止: {service_id}")
-                    self.page.update()
+                    self._page.update()
                 else:
                     self._show_snackbar("停止服务失败", Colors.RED_600)
             
@@ -427,7 +428,7 @@ class HomeView(ft.Container):
         
         def cancel_stop(e):
             dialog.open = False
-            self.page.update()
+            self._page.update()
         
         # 确认对话框
         dialog = ft.AlertDialog(
@@ -441,9 +442,9 @@ class HomeView(ft.Container):
             actions_alignment=ft.MainAxisAlignment.END
         )
         
-        self.page.dialog = dialog
+        self._page.dialog = dialog
         dialog.open = True
-        self.page.update()
+        self._page.update()
     
     def _open_browser(self, service: ServiceInstance):
         """打开浏览器"""
@@ -454,9 +455,9 @@ class HomeView(ft.Container):
     
     def _update_service_count(self):
         """更新服务计数"""
-        count = len(self.service_cards)
-        self.service_count_text.value = f"({count})"
-        self.service_count_text.update()
+        count = len(self._service_cards)
+        self._service_count_text.value = f"({count})"
+        self._service_count_text.update()
     
     def _start_uptime_timer(self):
         """启动运行时长定时器"""
@@ -467,7 +468,7 @@ class HomeView(ft.Container):
             while True:
                 time.sleep(1)
                 try:
-                    for card in self.service_cards.values():
+                    for card in self._service_cards.values():
                         card.update_uptime()
                 except Exception as e:
                     Logger.exception(f"更新运行时长失败: {e}")
@@ -480,19 +481,19 @@ class HomeView(ft.Container):
         """打开设置对话框"""
         def on_save():
             # 重新加载配置
-            self.config = self.config_manager.loadConfig()
-            self.current_port = self.config.get('default_port', 9000)
-            self.current_html = self.config.get('default_html', 'index.html')
+            self._config = self._config_manager.loadConfig()
+            self._current_port = self._config.get('default_port', 9000)
+            self._current_html = self._config.get('default_html', 'index.html')
             self._show_snackbar("设置已保存", Colors.GREEN_600)
         
-        dialog = SettingsDialog(self.page, self.config_manager, on_save)
+        dialog = SettingsDialog(self._page, self._config_manager, on_save)
         dialog.show()
     
     def _show_about(self, e):
         """显示关于对话框"""
         def close_dialog(e):
             dialog.open = False
-            self.page.update()
+            self._page.update()
         
         dialog = ft.AlertDialog(
             modal=True,
@@ -514,9 +515,9 @@ class HomeView(ft.Container):
             actions_alignment=ft.MainAxisAlignment.END
         )
         
-        self.page.dialog = dialog
+        self._page.dialog = dialog
         dialog.open = True
-        self.page.update()
+        self._page.update()
     
     def _show_snackbar(self, message: str, bgcolor: str):
         """显示Snackbar提示"""
@@ -525,6 +526,6 @@ class HomeView(ft.Container):
             bgcolor=bgcolor,
             duration=3000
         )
-        self.page.snack_bar = snackbar
+        self._page.snack_bar = snackbar
         snackbar.open = True
-        self.page.update()
+        self._page.update()

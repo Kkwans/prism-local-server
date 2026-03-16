@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets')],
+    datas=[('core', 'core'), ('ui', 'ui'), ('utils', 'utils'), ('assets', 'assets'), ('config', 'config')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,6 +35,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version='C:\\Users\\Kkwans\\AppData\\Local\\Temp\\aff8db9b-f7e0-4c5a-9df2-e5c7a44a7135',
+    version='C:\\Users\\Kkwans\\AppData\\Local\\Temp\\5cc9c3aa-1c85-426e-95d1-001a520291b5',
     icon=['assets\\icon.ico'],
 )
