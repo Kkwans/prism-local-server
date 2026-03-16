@@ -233,7 +233,7 @@ class HomeView(ft.Container):
             content=ft.Row(
                 controls=[
                     ft.Icon(
-                        ft.icons.HEXAGON,
+                        "hexagon",
                         size=32,
                         color=Colors.BLUE_600
                     ),

@@ -13,8 +13,10 @@ from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
 
-# 日志目录
-LOG_DIR = "logs"
+# 日志目录（使用用户目录）
+USER_HOME = Path.home()
+CONFIG_DIR_NAME = ".prism-server"
+LOG_DIR = USER_HOME / CONFIG_DIR_NAME / "logs"
 LOG_FILE = "prism-server.log"
 
 # 日志格式
@@ -45,13 +47,13 @@ class Logger:
     _logger = None
     
     @classmethod
-    def initialize(cls, log_dir: str = LOG_DIR, log_file: str = LOG_FILE, 
+    def initialize(cls, log_dir: Path = LOG_DIR, log_file: str = LOG_FILE, 
                   log_level: int = LOG_LEVEL) -> logging.Logger:
         """
         初始化日志系统
         
         参数:
-            log_dir: 日志目录
+            log_dir: 日志目录（Path对象）
             log_file: 日志文件名
             log_level: 日志级别
         
