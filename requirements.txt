@@ -1,0 +1,9 @@
+# Flet - 现代化UI框架(基于Flutter)
+flet>=0.24.0
+
+# HTTP服务相关
+requests>=2.31.0
+
+# 系统托盘(Windows)
+pystray>=0.19.5
+Pillow>=10.0.0
