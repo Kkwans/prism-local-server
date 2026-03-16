@@ -38,11 +38,19 @@ python main.py
 
 ## 打包为EXE
 
+**推荐方法（Flet 官方）**：
+```bash
+pack.bat
+```
+
+**备用方法（PyInstaller，不推荐）**：
 ```bash
 build.bat
 ```
 
 打包后的EXE文件位于 `dist/PrismLocalServer.exe`
+
+详细说明请查看：[docs/打包说明.md](docs/打包说明.md)
 
 ## 配置文件位置
 
