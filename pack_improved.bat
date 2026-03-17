@@ -45,8 +45,7 @@ flet pack main.py ^
     --add-data "ui;ui" ^
     --add-data "utils;utils" ^
     --add-data "assets;assets" ^
-    --add-data "config;config" ^
-    --debug-console true
+    --add-data "config;config"
 
 if errorlevel 1 (
     echo.

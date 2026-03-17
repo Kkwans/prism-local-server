@@ -26,37 +26,57 @@ class PrismApp:
     
     def __init__(self, page: ft.Page):
         """初始化应用"""
-        self.page = page
-        self.page.title = "Prism Local Server"
-        self.page.window_width = 1100
-        self.page.window_height = 750
-        self.page.window_min_width = 900
-        self.page.window_min_height = 650
-        self.page.padding = 0
-        self.page.theme_mode = ft.ThemeMode.SYSTEM
-        
-        # 设置Material 3主题
-        self.page.theme = ft.Theme(
-            color_scheme_seed="blue",
-            use_material3=True
-        )
-        
-        # 初始化管理器
-        Logger.initialize()
-        self.config_manager = ConfigManager()
-        self.server_manager = HTTPServerManager()
-        
-        # 创建主视图
-        self.home_view = HomeView(
-            page=self.page,
-            config_manager=self.config_manager,
-            server_manager=self.server_manager
-        )
-        
-        # 设置页面内容
-        self.page.add(self.home_view.container)
-        
-        Logger.info("Prism应用启动成功")
+        try:
+            self.page = page
+            self.page.title = "Prism Local Server"
+            self.page.window_width = 1100
+            self.page.window_height = 750
+            self.page.window_min_width = 900
+            self.page.window_min_height = 650
+            self.page.padding = 0
+            self.page.theme_mode = ft.ThemeMode.SYSTEM
+            
+            # 设置Material 3主题
+            self.page.theme = ft.Theme(
+                color_scheme_seed="blue",
+                use_material3=True
+            )
+            
+            # 初始化管理器
+            Logger.initialize()
+            Logger.info("日志系统初始化完成")
+            
+            self.config_manager = ConfigManager()
+            Logger.info("配置管理器初始化完成")
+            
+            self.server_manager = HTTPServerManager()
+            Logger.info("服务管理器初始化完成")
+            
+            # 创建主视图
+            Logger.info("开始创建主视图...")
+            self.home_view = HomeView(
+                page=self.page,
+                config_manager=self.config_manager,
+                server_manager=self.server_manager
+            )
+            Logger.info("主视图创建完成")
+            
+            # 设置页面内容
+            Logger.info("开始添加主视图到页面...")
+            self.page.add(self.home_view.container)
+            Logger.info("主视图已添加到页面")
+            
+            # 强制更新页面
+            self.page.update()
+            Logger.info("页面更新完成")
+            
+            Logger.info("Prism应用启动成功")
+            
+        except Exception as e:
+            Logger.exception(f"应用初始化失败: {e}")
+            # 显示错误信息
+            self.page.add(ft.Text(f"应用初始化失败: {str(e)}", color="red", size=20))
+            self.page.update()
 
 
 def main(page: ft.Page):

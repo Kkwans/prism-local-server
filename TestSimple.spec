@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['main.py'],
+    ['test_simple_ui.py'],
     pathex=[],
     binaries=[],
-    datas=[('core', 'core'), ('ui', 'ui'), ('utils', 'utils'), ('assets', 'assets'), ('config', 'config')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='PrismLocalServer',
+    name='TestSimple',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -35,6 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version='C:\\Users\\Kkwans\\AppData\\Local\\Temp\\3d1745e7-1258-489b-943e-84e66f6b08ee',
-    icon=['assets\\icon.ico'],
+    version='C:\\Users\\Kkwans\\AppData\\Local\\Temp\\d733aeb6-794c-4937-b2b4-7944984c973a',
 )
