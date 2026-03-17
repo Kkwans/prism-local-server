@@ -54,7 +54,7 @@ class PrismApp:
         )
         
         # 设置页面内容
-        self.page.add(self.home_view)
+        self.page.add(self.home_view.container)
         
         Logger.info("Prism应用启动成功")
 
@@ -66,4 +66,4 @@ def main(page: ft.Page):
 
 if __name__ == "__main__":
     # 使用Flet 0.80+的新API
-    ft.app(main)
+    ft.run(main)

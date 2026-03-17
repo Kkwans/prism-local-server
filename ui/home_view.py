@@ -19,7 +19,7 @@ from utils.network_utils import NetworkUtils
 from ui.settings_dialog import SettingsDialog
 
 
-class ServiceCard(ft.Container):
+class ServiceCard:
     """服务卡片组件"""
     
     def __init__(self, service: ServiceInstance, on_stop, on_open):
@@ -32,11 +32,11 @@ class ServiceCard(ft.Container):
         self.uptime_text = ft.Text(
             f"运行时长: {service.getUptime()}",
             size=12,
-            color="grey600"
+            color=ft.Colors.GREY_600
         )
         
-        # 创建卡片内容
-        super().__init__(
+        # 创建卡片容器
+        self.container = ft.Container(
             content=ft.Row(
                 controls=[
                     # 左侧信息区域
@@ -48,14 +48,14 @@ class ServiceCard(ft.Container):
                                     controls=[
                                         ft.Icon(
                                             "circle",
-                                            color="green600",
+                                            color=ft.Colors.GREEN_600,
                                             size=12
                                         ),
                                         ft.Text(
                                             "运行中",
                                             size=14,
                                             weight=ft.FontWeight.BOLD,
-                                            color="green700"
+                                            color=ft.Colors.GREEN_700
                                         ),
                                         ft.Container(width=10),
                                         ft.Text(
@@ -74,12 +74,12 @@ class ServiceCard(ft.Container):
                                         ft.Icon(
                                             "folder_outlined",
                                             size=16,
-                                            color="grey600"
+                                            color=ft.Colors.GREY_600
                                         ),
                                         ft.Text(
                                             service.directory,
                                             size=12,
-                                            color="grey700"
+                                            color=ft.Colors.GREY_700
                                         )
                                     ],
                                     spacing=5
@@ -90,12 +90,12 @@ class ServiceCard(ft.Container):
                                         ft.Icon(
                                             "language",
                                             size=16,
-                                            color="blue600"
+                                            color=ft.Colors.BLUE_600
                                         ),
                                         ft.Text(
                                             NetworkUtils.generateLocalURL(service.port, service.entry_html),
                                             size=12,
-                                            color="blue700"
+                                            color=ft.Colors.BLUE_700
                                         )
                                     ],
                                     spacing=5
@@ -110,18 +110,22 @@ class ServiceCard(ft.Container):
                     ft.Container(
                         content=ft.Row(
                             controls=[
-                                ft.FilledTonalButton(
+                                ft.Button(
                                     "打开",
                                     icon="open_in_browser",
-                                    on_click=lambda _: self.on_open(service)
+                                    on_click=lambda _: self.on_open(service),
+                                    style=ft.ButtonStyle(
+                                        bgcolor=ft.Colors.SURFACE_CONTAINER,
+                                        color=ft.Colors.ON_SURFACE
+                                    )
                                 ),
-                                ft.FilledButton(
+                                ft.Button(
                                     "停止",
                                     icon="stop",
                                     on_click=lambda _: self.on_stop(service.id),
                                     style=ft.ButtonStyle(
-                                        bgcolor="red600",
-                                        color="white"
+                                        bgcolor=ft.Colors.RED_600,
+                                        color=ft.Colors.WHITE
                                     )
                                 )
                             ],
@@ -132,7 +136,7 @@ class ServiceCard(ft.Container):
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             ),
-            bgcolor="surfacevariant",
+            bgcolor=ft.Colors.SURFACE_CONTAINER,
             border_radius=12,
             margin=ft.margin.only(bottom=12),
             animate=ft.animation.Animation(300, ft.AnimationCurve.EASE_OUT)
@@ -144,12 +148,11 @@ class ServiceCard(ft.Container):
         self.uptime_text.update()
 
 
-class HomeView(ft.Container):
+class HomeView:
     """主页视图"""
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, server_manager: HTTPServerManager):
         """初始化主页视图"""
-        # 先保存引用到私有变量
         self._page = page
         self._config_manager = config_manager
         self._server_manager = server_manager
@@ -167,7 +170,7 @@ class HomeView(ft.Container):
         self._service_count_text = ft.Text(
             "(0)",
             size=14,
-            color="grey600"
+            color=ft.Colors.GREY_600
         )
         
         # 服务列表容器
@@ -184,18 +187,18 @@ class HomeView(ft.Container):
                     ft.Icon(
                         "inbox",
                         size=80,
-                        color="grey400"
+                        color=ft.Colors.GREY_400
                     ),
                     ft.Text(
                         "暂无运行中的服务",
                         size=18,
-                        color="grey600",
+                        color=ft.Colors.GREY_600,
                         weight=ft.FontWeight.W_500
                     ),
                     ft.Text(
                         "点击\"启动服务\"按钮开始",
                         size=14,
-                        color="grey500"
+                        color=ft.Colors.GREY_500
                     )
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -205,8 +208,8 @@ class HomeView(ft.Container):
             alignment=ft.alignment.Alignment(0, 0)
         )
         
-        # 创建UI
-        super().__init__(
+        # 创建主容器
+        self.container = ft.Container(
             content=ft.Column(
                 controls=[
                     # 顶部应用栏
@@ -220,7 +223,7 @@ class HomeView(ft.Container):
                 expand=True
             ),
             expand=True,
-            bgcolor="background"
+            bgcolor=ft.Colors.SURFACE
         )
         
         # 启动定时器更新运行时长
@@ -234,7 +237,7 @@ class HomeView(ft.Container):
                     ft.Icon(
                         "hexagon",
                         size=32,
-                        color="blue600"
+                        color=ft.Colors.BLUE_600
                     ),
                     ft.Text(
                         "Prism Local Server",
@@ -255,7 +258,7 @@ class HomeView(ft.Container):
                 ],
                 alignment=ft.MainAxisAlignment.START
             ),
-            bgcolor="surfacevariant",
+            bgcolor=ft.Colors.SURFACE_CONTAINER,
             padding=ft.padding.symmetric(horizontal=24, vertical=16)
         )
     
@@ -272,17 +275,21 @@ class HomeView(ft.Container):
                     ft.Container(height=16),
                     ft.Row(
                         controls=[
-                            ft.FilledTonalButton(
+                            ft.Button(
                                 "选择目录",
                                 icon="folder_open",
                                 on_click=self._select_directory,
                                 height=48
                             ),
-                            ft.FilledButton(
+                            ft.Button(
                                 "启动服务",
                                 icon="rocket_launch",
                                 on_click=self._start_service,
-                                height=48
+                                height=48,
+                                style=ft.ButtonStyle(
+                                    bgcolor=ft.Colors.PRIMARY,
+                                    color=ft.Colors.ON_PRIMARY
+                                )
                             )
                         ],
                         spacing=12
@@ -291,7 +298,7 @@ class HomeView(ft.Container):
                 spacing=0
             ),
             padding=ft.padding.all(24),
-            bgcolor="surface",
+            bgcolor=ft.Colors.SURFACE,
             border_radius=16,
             margin=ft.margin.all(24)
         )
@@ -338,7 +345,7 @@ class HomeView(ft.Container):
             if result.path:
                 self._current_directory = result.path
                 Logger.info(f"选择目录: {result.path}")
-                self._show_snackbar(f"已选择目录: {result.path}", "green600")
+                self._show_snackbar(f"已选择目录: {result.path}", ft.Colors.GREEN_600)
         
         file_picker = ft.FilePicker(on_result=on_result)
         self._page.overlay.append(file_picker)
@@ -361,13 +368,13 @@ class HomeView(ft.Container):
             
             # 显示成功消息
             local_url = NetworkUtils.generateLocalURL(service.port, service.entry_html)
-            self._show_snackbar(f"服务启动成功！端口: {service.port}", "green600")
+            self._show_snackbar(f"服务启动成功！端口: {service.port}", ft.Colors.GREEN_600)
             
             Logger.info(f"服务启动成功: 端口{service.port}")
         
         except Exception as ex:
             Logger.exception(f"启动服务失败: {ex}")
-            self._show_snackbar(f"启动服务失败: {str(ex)}", "red600")
+            self._show_snackbar(f"启动服务失败: {str(ex)}", ft.Colors.RED_600)
     
     def _add_service_card(self, service: ServiceInstance):
         """添加服务卡片"""
@@ -382,7 +389,7 @@ class HomeView(ft.Container):
         )
         
         # 添加到列表
-        self._service_list.controls.append(card)
+        self._service_list.controls.append(card.container)
         self._service_cards[service.id] = card
         
         # 更新服务计数
@@ -405,7 +412,7 @@ class HomeView(ft.Container):
                     # 从UI中移除
                     if service_id in self._service_cards:
                         card = self._service_cards[service_id]
-                        self._service_list.controls.remove(card)
+                        self._service_list.controls.remove(card.container)
                         del self._service_cards[service_id]
                     
                     # 更新服务计数
@@ -415,15 +422,15 @@ class HomeView(ft.Container):
                     if len(self._service_cards) == 0:
                         self._empty_state.visible = True
                     
-                    self._show_snackbar("服务已停止", "green600")
+                    self._show_snackbar("服务已停止", ft.Colors.GREEN_600)
                     Logger.info(f"服务已停止: {service_id}")
                     self._page.update()
                 else:
-                    self._show_snackbar("停止服务失败", "red600")
+                    self._show_snackbar("停止服务失败", ft.Colors.RED_600)
             
             except Exception as ex:
                 Logger.exception(f"停止服务失败: {ex}")
-                self._show_snackbar(f"停止服务失败: {str(ex)}", "red600")
+                self._show_snackbar(f"停止服务失败: {str(ex)}", ft.Colors.RED_600)
         
         def cancel_stop(e):
             dialog.open = False
@@ -436,7 +443,10 @@ class HomeView(ft.Container):
             content=ft.Text("确定要停止这个服务吗？"),
             actions=[
                 ft.TextButton("取消", on_click=cancel_stop),
-                ft.FilledButton("停止", on_click=confirm_stop)
+                ft.Button("停止", on_click=confirm_stop, style=ft.ButtonStyle(
+                    bgcolor=ft.Colors.PRIMARY,
+                    color=ft.Colors.ON_PRIMARY
+                ))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
@@ -450,7 +460,7 @@ class HomeView(ft.Container):
         url = NetworkUtils.generateLocalURL(service.port, service.entry_html)
         webbrowser.open(url)
         Logger.info(f"打开浏览器: {url}")
-        self._show_snackbar(f"已打开浏览器", "blue600")
+        self._show_snackbar(f"已打开浏览器", ft.Colors.BLUE_600)
     
     def _update_service_count(self):
         """更新服务计数"""
@@ -483,7 +493,7 @@ class HomeView(ft.Container):
             self._config = self._config_manager.loadConfig()
             self._current_port = self._config.get('default_port', 9000)
             self._current_html = self._config.get('default_html', 'index.html')
-            self._show_snackbar("设置已保存", "green600")
+            self._show_snackbar("设置已保存", ft.Colors.GREEN_600)
         
         dialog = SettingsDialog(self._page, self._config_manager, on_save)
         dialog.show()
@@ -503,13 +513,16 @@ class HomeView(ft.Container):
                     ft.Text("基于 Flet (Flutter) 构建", size=14),
                     ft.Text("作者: Kkwans", size=14),
                     ft.Text("", size=14),
-                    ft.Text("一个现代化的前端静态文件部署工具", size=12, color="grey600")
+                    ft.Text("一个现代化的前端静态文件部署工具", size=12, color=ft.Colors.GREY_600)
                 ],
                 spacing=8,
                 tight=True
             ),
             actions=[
-                ft.FilledButton("关闭", on_click=close_dialog)
+                ft.Button("关闭", on_click=close_dialog, style=ft.ButtonStyle(
+                    bgcolor=ft.Colors.PRIMARY,
+                    color=ft.Colors.ON_PRIMARY
+                ))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
@@ -518,7 +531,7 @@ class HomeView(ft.Container):
         dialog.open = True
         self._page.update()
     
-    def _show_snackbar(self, message: str, bgcolor: str):
+    def _show_snackbar(self, message: str, bgcolor):
         """显示Snackbar提示"""
         snackbar = ft.SnackBar(
             content=ft.Text(message, color="white"),

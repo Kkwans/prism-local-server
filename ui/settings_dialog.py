@@ -62,7 +62,10 @@ class SettingsDialog:
             ),
             actions=[
                 ft.TextButton("取消", on_click=self._close),
-                ft.FilledButton("保存", on_click=self._save)
+                ft.Button("保存", on_click=self._save, style=ft.ButtonStyle(
+                    bgcolor=ft.Colors.PRIMARY,
+                    color=ft.Colors.ON_PRIMARY
+                ))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
@@ -118,7 +121,7 @@ class SettingsDialog:
         """显示错误提示"""
         snackbar = ft.SnackBar(
             content=ft.Text(message, color="white"),
-            bgcolor="red600"
+            bgcolor=ft.Colors.RED_600
         )
         self.page.snack_bar = snackbar
         snackbar.open = True
