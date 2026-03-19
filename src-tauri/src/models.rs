@@ -46,6 +46,8 @@ pub enum ServerStatus {
 pub struct ServerInfo {
     /// 服务唯一标识符（UUID）
     pub id: String,
+    /// 服务名称（从目录提取）
+    pub name: String,
     /// 监听端口
     pub port: u16,
     /// 部署目录路径
@@ -88,6 +90,10 @@ pub struct AppConfig {
     /// 是否最小化到托盘
     #[serde(default = "default_true")]
     pub minimize_to_tray: bool,
+    
+    /// 目录是否由用户手动设置（用于区分用户设置和自动识别）
+    #[serde(default = "default_false")]
+    pub is_directory_user_set: bool,
 }
 
 fn default_theme() -> String {
@@ -96,6 +102,10 @@ fn default_theme() -> String {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_false() -> bool {
+    false
 }
 
 impl Default for AppConfig {
@@ -107,6 +117,7 @@ impl Default for AppConfig {
             theme: default_theme(),
             auto_open_browser: true,
             minimize_to_tray: true,
+            is_directory_user_set: false,
         }
     }
 }

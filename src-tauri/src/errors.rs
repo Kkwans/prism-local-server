@@ -17,6 +17,13 @@ pub enum ServerError {
     #[error("目录不存在: {0}")]
     DirectoryNotFound(String),
     
+    /// 部署目录已被使用
+    #[error("部署目录已被服务 {name} (端口 {port}) 使用")]
+    DirectoryInUse {
+        name: String,
+        port: u16,
+    },
+    
     /// 入口文件不存在
     #[error("入口文件不存在: {0}")]
     EntryFileNotFound(String),

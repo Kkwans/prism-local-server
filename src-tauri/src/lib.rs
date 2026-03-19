@@ -5,9 +5,14 @@ pub mod utils;
 pub mod config;
 pub mod server;
 pub mod commands;
+pub mod git;
 
 use server::manager::ServerManager;
+use config::manager::ConfigManager;
+use commands::config_commands::ConfigManagerState;
 use tauri::{Manager, menu::{MenuBuilder, MenuItem}, tray::{TrayIconBuilder, TrayIconEvent}};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -24,6 +29,12 @@ pub fn run() {
             .build(),
         )?;
       }
+      
+      // 初始化配置管理器
+      let config_manager = tauri::async_runtime::block_on(async {
+        ConfigManager::new().await
+      }).expect("无法初始化配置管理器");
+      app.manage(Arc::new(Mutex::new(config_manager)) as ConfigManagerState);
       
       // 初始化服务管理器
       app.manage(ServerManager::new());
@@ -85,6 +96,7 @@ pub fn run() {
       // 配置管理命令
       commands::config_commands::load_app_config,
       commands::config_commands::save_app_config,
+      commands::config_commands::get_executable_directory,
       // 网络工具命令
       commands::network_commands::check_port,
       commands::network_commands::get_lan_ip,

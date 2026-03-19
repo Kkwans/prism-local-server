@@ -4,3 +4,4 @@ pub mod mime;
 pub mod range;
 pub mod handler;
 pub mod manager;
+pub mod namer;

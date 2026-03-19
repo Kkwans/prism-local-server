@@ -54,19 +54,20 @@ pub fn parse_range_header(
         return None;
     }
     
-    let start = if parts[0].is_empty() {
+    let (start, end) = if parts[0].is_empty() {
         // bytes=-500 格式（最后 N 字节）
         let suffix_length: u64 = parts[1].parse().ok()?;
-        file_size.saturating_sub(suffix_length)
-    } else {
-        parts[0].parse().ok()?
-    };
-    
-    let end = if parts[1].is_empty() {
+        let start = file_size.saturating_sub(suffix_length);
+        (start, file_size - 1)
+    } else if parts[1].is_empty() {
         // bytes=500- 格式（从 N 到末尾）
-        file_size - 1
+        let start: u64 = parts[0].parse().ok()?;
+        (start, file_size - 1)
     } else {
-        parts[1].parse::<u64>().ok()?.min(file_size - 1)
+        // bytes=500-999 格式（指定范围）
+        let start: u64 = parts[0].parse().ok()?;
+        let end: u64 = parts[1].parse::<u64>().ok()?.min(file_size - 1);
+        (start, end)
     };
     
     // 验证范围有效性

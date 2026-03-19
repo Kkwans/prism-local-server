@@ -3,6 +3,7 @@
 use crate::errors::ServerError;
 use crate::models::{ServerConfig, ServerInfo, ServerStatus};
 use crate::server::handler::handle_static_file;
+use crate::server::namer::ServiceNamer;
 use crate::utils::network::get_primary_lan_ip;
 use crate::utils::port::{check_port_availability, find_available_port};
 use axum::Router;
@@ -10,26 +11,34 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::{oneshot, RwLock};
 use tokio::task::JoinHandle;
 
 /// 服务器实例信息
 struct ServerInstance {
+    /// 服务器基本信息
     info: ServerInfo,
+    /// 异步任务句柄
     task_handle: JoinHandle<()>,
+    /// 优雅关闭信号发送器
+    shutdown_tx: Option<oneshot::Sender<()>>,
 }
 
 /// 服务管理器状态
 #[derive(Clone)]
 pub struct ServerManager {
-    servers: Arc<Mutex<HashMap<String, ServerInstance>>>,
+    /// 运行中的服务实例映射表（服务 ID -> 实例）
+    servers: Arc<RwLock<HashMap<String, ServerInstance>>>,
+    /// 服务命名器
+    namer: ServiceNamer,
 }
 
 impl ServerManager {
     /// 创建新的服务管理器
     pub fn new() -> Self {
         Self {
-            servers: Arc::new(Mutex::new(HashMap::new())),
+            servers: Arc::new(RwLock::new(HashMap::new())),
+            namer: ServiceNamer::new(),
         }
     }
 
@@ -37,6 +46,9 @@ impl ServerManager {
     pub async fn start_server(&self, config: ServerConfig) -> Result<ServerInfo, ServerError> {
         // 验证配置
         self.validate_config(&config)?;
+
+        // 检查目录唯一性
+        self.check_directory_uniqueness(&config.directory).await?;
 
         // 检查端口可用性，如果不可用则自动递增查找
         let port = if check_port_availability(config.port) {
@@ -49,6 +61,9 @@ impl ServerManager {
         // 生成服务 ID
         let server_id = uuid::Uuid::new_v4().to_string();
 
+        // 生成服务名称（从目录路径提取）
+        let service_name = self.namer.generate_service_name(&config.directory);
+
         // 获取局域网 IP
         let lan_ip = get_primary_lan_ip().unwrap_or_else(|| "127.0.0.1".to_string());
 
@@ -59,6 +74,7 @@ impl ServerManager {
         // 创建服务器信息
         let server_info = ServerInfo {
             id: server_id.clone(),
+            name: service_name,
             port,
             directory: config.directory.clone(),
             entry_file: config.entry_file.clone(),
@@ -68,10 +84,13 @@ impl ServerManager {
             start_time: chrono::Utc::now().timestamp_millis(),
         };
 
+        // 创建优雅关闭通道
+        let (shutdown_tx, shutdown_rx) = oneshot::channel();
+
         // 启动 HTTP 服务器
         let root_dir = PathBuf::from(&config.directory);
         let task_handle = tokio::spawn(async move {
-            if let Err(e) = start_http_server(root_dir, port).await {
+            if let Err(e) = start_http_server(root_dir, port, shutdown_rx).await {
                 eprintln!("服务器错误: {}", e);
             }
         });
@@ -80,9 +99,10 @@ impl ServerManager {
         let instance = ServerInstance {
             info: server_info.clone(),
             task_handle,
+            shutdown_tx: Some(shutdown_tx),
         };
 
-        let mut servers = self.servers.lock().await;
+        let mut servers = self.servers.write().await;
         servers.insert(server_id, instance);
 
         Ok(server_info)
@@ -90,11 +110,16 @@ impl ServerManager {
 
     /// 停止服务器
     pub async fn stop_server(&self, server_id: &str) -> Result<(), ServerError> {
-        let mut servers = self.servers.lock().await;
+        let mut servers = self.servers.write().await;
 
-        let instance = servers
+        let mut instance = servers
             .remove(server_id)
             .ok_or_else(|| ServerError::ServerNotFound(server_id.to_string()))?;
+
+        // 发送优雅关闭信号
+        if let Some(shutdown_tx) = instance.shutdown_tx.take() {
+            let _ = shutdown_tx.send(());
+        }
 
         // 中止任务
         instance.task_handle.abort();
@@ -106,7 +131,7 @@ impl ServerManager {
     pub async fn restart_server(&self, server_id: &str) -> Result<ServerInfo, ServerError> {
         // 获取原服务器配置
         let config = {
-            let servers = self.servers.lock().await;
+            let servers = self.servers.read().await;
             let instance = servers
                 .get(server_id)
                 .ok_or_else(|| ServerError::ServerNotFound(server_id.to_string()))?;
@@ -127,14 +152,40 @@ impl ServerManager {
 
     /// 列出所有服务器
     pub async fn list_servers(&self) -> Vec<ServerInfo> {
-        let servers = self.servers.lock().await;
+        let servers = self.servers.read().await;
         servers.values().map(|instance| instance.info.clone()).collect()
     }
 
     /// 获取服务器信息
     pub async fn get_server(&self, server_id: &str) -> Option<ServerInfo> {
-        let servers = self.servers.lock().await;
+        let servers = self.servers.read().await;
         servers.get(server_id).map(|instance| instance.info.clone())
+    }
+
+    /// 检查部署目录唯一性
+    async fn check_directory_uniqueness(&self, directory: &str) -> Result<(), ServerError> {
+        let servers = self.servers.read().await;
+        
+        // 规范化路径（转换为绝对路径）
+        let target_path = PathBuf::from(directory)
+            .canonicalize()
+            .map_err(|_| ServerError::DirectoryNotFound(directory.to_string()))?;
+
+        // 检查是否有服务正在使用该目录
+        for instance in servers.values() {
+            let existing_path = PathBuf::from(&instance.info.directory)
+                .canonicalize()
+                .unwrap_or_else(|_| PathBuf::from(&instance.info.directory));
+
+            if target_path == existing_path {
+                return Err(ServerError::DirectoryInUse {
+                    name: instance.info.name.clone(),
+                    port: instance.info.port,
+                });
+            }
+        }
+
+        Ok(())
     }
 
     /// 验证配置
@@ -165,7 +216,11 @@ impl ServerManager {
 }
 
 /// 启动 HTTP 服务器
-async fn start_http_server(root_dir: PathBuf, port: u16) -> Result<(), Box<dyn std::error::Error>> {
+async fn start_http_server(
+    root_dir: PathBuf,
+    port: u16,
+    shutdown_rx: oneshot::Receiver<()>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let root_dir_clone = root_dir.clone();
 
     // 创建路由
@@ -192,7 +247,13 @@ async fn start_http_server(root_dir: PathBuf, port: u16) -> Result<(), Box<dyn s
 
     // 启动服务器
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+    
+    // 使用 with_graceful_shutdown 支持优雅关闭
+    axum::serve(listener, app)
+        .with_graceful_shutdown(async {
+            shutdown_rx.await.ok();
+        })
+        .await?;
 
     Ok(())
 }
