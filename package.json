@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build && powershell -ExecutionPolicy Bypass -File ./scripts/post-build.ps1"
   },
   "keywords": [
     "tauri",

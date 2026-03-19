@@ -34,3 +34,6 @@ logs/
 # Environment
 .env
 .env.local
+
+# Build artifacts - Root level EXE files
+prism-local-server-v*.exe
