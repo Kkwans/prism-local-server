@@ -73,7 +73,7 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
       await onStop(server.id);
       toast({
         title: "服务已停止",
-        description: `服务 #${server.id.slice(0, 8)} 已成功停止`,
+        description: `服务 "${server.name}" 已成功停止`,
       });
     } catch (error) {
       toast({
@@ -90,7 +90,7 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
       await onRestart(server.id);
       toast({
         title: "服务已重启",
-        description: `服务 #${server.id.slice(0, 8)} 已成功重启`,
+        description: `服务 "${server.name}" 已成功重启`,
       });
     } catch (error) {
       toast({
@@ -111,7 +111,7 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
       >
         <Card className="glass card-shadow hover:shadow-xl transition-all duration-300 border-2">
           <CardContent className="p-6">
-            {/* 头部：服务ID和状态 */}
+            {/* 头部：服务名称和状态 */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
@@ -120,8 +120,8 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    服务 #{server.id.slice(0, 8)}
+                  <h3 className="text-lg font-semibold text-foreground" title={server.name}>
+                    {server.name}
                   </h3>
                   <p className="text-sm text-muted-foreground">端口: {server.port}</p>
                 </div>
@@ -273,7 +273,7 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
               确认停止服务
             </DialogTitle>
             <DialogDescription className="text-base">
-              确定要停止服务 <span className="font-semibold text-foreground">#{server.id.slice(0, 8)}</span> 吗？
+              确定要停止服务 <span className="font-semibold text-foreground">"{server.name}"</span> 吗？
               <br />
               此操作将关闭端口 <span className="font-semibold text-foreground">{server.port}</span>。
             </DialogDescription>

@@ -10,6 +10,7 @@ interface ServerStore {
   error: string | null;
   
   // Actions
+  fetchServers: () => Promise<void>;
   startServer: (config: ServerConfig) => Promise<void>;
   stopServer: (serverId: string) => Promise<void>;
   restartServer: (serverId: string) => Promise<void>;
@@ -17,10 +18,21 @@ interface ServerStore {
   setError: (error: string | null) => void;
 }
 
-export const useServerStore = create<ServerStore>((set) => ({
+export const useServerStore = create<ServerStore>((set, get) => ({
   servers: [],
   isLoading: false,
   error: null,
+
+  fetchServers: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const servers = await invoke<ServerInfo[]>('list_servers');
+      set({ servers, isLoading: false });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : '获取服务列表失败';
+      set({ error: errorMsg, isLoading: false });
+    }
+  },
 
   startServer: async (config: ServerConfig) => {
     set({ isLoading: true, error: null });
@@ -31,7 +43,7 @@ export const useServerStore = create<ServerStore>((set) => ({
         isLoading: false,
       }));
     } catch (error) {
-      const errorMsg = error as string;
+      const errorMsg = error instanceof Error ? error.message : String(error);
       set({ error: errorMsg, isLoading: false });
       throw error;
     }
@@ -46,7 +58,7 @@ export const useServerStore = create<ServerStore>((set) => ({
         isLoading: false,
       }));
     } catch (error) {
-      const errorMsg = error as string;
+      const errorMsg = error instanceof Error ? error.message : String(error);
       set({ error: errorMsg, isLoading: false });
       throw error;
     }
@@ -61,21 +73,15 @@ export const useServerStore = create<ServerStore>((set) => ({
         isLoading: false,
       }));
     } catch (error) {
-      const errorMsg = error as string;
+      const errorMsg = error instanceof Error ? error.message : String(error);
       set({ error: errorMsg, isLoading: false });
       throw error;
     }
   },
 
   refreshServerList: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const servers = await invoke<ServerInfo[]>('list_servers');
-      set({ servers, isLoading: false });
-    } catch (error) {
-      const errorMsg = error as string;
-      set({ error: errorMsg, isLoading: false });
-    }
+    // 别名,调用 fetchServers
+    await get().fetchServers();
   },
 
   setError: (error: string | null) => {

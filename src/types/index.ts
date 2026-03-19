@@ -10,6 +10,7 @@ export interface ServerConfig {
 
 export interface ServerInfo {
   id: string;
+  name: string;
   port: number;
   directory: string;
   entry_file: string;

@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ServerCard } from './ServerCard';
 import { SettingsDialog } from './SettingsDialog';
@@ -16,6 +16,24 @@ export const Dashboard = memo(function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [directory, setDirectory] = useState('');
   const [port, setPort] = useState(8888);
+
+  // 应用启动时刷新服务列表
+  useEffect(() => {
+    refreshServerList();
+  }, [refreshServerList]);
+
+  // 配置加载后自动填充到主界面(仅在输入框为空时)
+  useEffect(() => {
+    if (config && !directory) {
+      setDirectory(config.default_directory || '');
+    }
+  }, [config, directory]);
+
+  useEffect(() => {
+    if (config && port === 8888 && config.default_port !== 8888) {
+      setPort(config.default_port);
+    }
+  }, [config, port]);
 
   // 使用 useCallback 优化回调函数
   const handleStartServer = useCallback(async () => {
@@ -125,38 +143,40 @@ export const Dashboard = memo(function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">部署目录</label>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3">
                 <input
                   type="text"
                   value={directory}
                   onChange={(e) => setDirectory(e.target.value)}
                   placeholder="选择要部署的目录"
-                  className="flex-1 px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+                  className="flex-1 px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm h-12"
                 />
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      const { invoke } = await import('@tauri-apps/api/core');
-                      const result = await invoke<string | null>('select_directory');
-                      if (result) {
-                        setDirectory(result);
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const { invoke } = await import('@tauri-apps/api/core');
+                        const result = await invoke<string | null>('select_directory');
+                        if (result) {
+                          setDirectory(result);
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "选择失败",
+                          description: String(error),
+                          variant: "destructive",
+                        });
                       }
-                    } catch (error) {
-                      toast({
-                        title: "选择失败",
-                        description: String(error),
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="px-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                  </svg>
-                  浏览
-                </Button>
+                    }}
+                    className="h-12 px-6 shadow-sm hover:shadow-md transition-all rounded-xl border-2 flex items-center justify-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    浏览
+                  </Button>
+                </motion.div>
               </div>
             </div>
 
@@ -168,7 +188,7 @@ export const Dashboard = memo(function Dashboard() {
                 onChange={(e) => setPort(Number(e.target.value))}
                 min={1024}
                 max={65535}
-                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm h-12"
               />
             </div>
           </div>
