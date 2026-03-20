@@ -150,7 +150,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 placeholder="留空则使用 EXE 所在目录"
                 className="flex-1 bg-white border-2 focus:ring-2 focus:ring-green-500 transition-all h-10"
               />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div 
+                whileHover={{ scale: 1.03 }} 
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Button 
                   variant="outline" 
                   onClick={handleSelectDirectory}
@@ -158,8 +162,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 >
                   <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                  </svg>
-                  浏览
+                    </svg>
+                    浏览
                 </Button>
               </motion.div>
             </div>

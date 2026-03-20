@@ -25,6 +25,21 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
+    // 代码分割优化
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 将 React 相关库分离到单独的 chunk
+          'react-vendor': ['react', 'react-dom'],
+          // 将 UI 组件库分离
+          'ui-vendor': ['framer-motion', 'zustand'],
+          // 将 Tauri API 分离
+          'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-opener'],
+        },
+      },
+    },
+    // 设置 chunk 大小警告阈值
+    chunkSizeWarningLimit: 500,
   },
   
   // Tauri 期望固定端口，如果端口不可用则失败

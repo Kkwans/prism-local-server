@@ -11,7 +11,7 @@ interface ServerStore {
   
   // Actions
   fetchServers: () => Promise<void>;
-  startServer: (config: ServerConfig) => Promise<void>;
+  startServer: (config: ServerConfig) => Promise<ServerInfo>;
   stopServer: (serverId: string) => Promise<void>;
   restartServer: (serverId: string) => Promise<void>;
   refreshServerList: () => Promise<void>;
@@ -42,6 +42,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
         servers: [...state.servers, serverInfo],
         isLoading: false,
       }));
+      return serverInfo; // 返回服务信息，供调用者检测端口变更
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       set({ error: errorMsg, isLoading: false });

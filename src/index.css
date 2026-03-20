@@ -58,9 +58,22 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
 }
 
-/* 卡片阴影效果 */
+/* 卡片阴影效果 - 三层阴影系统 */
 .card-shadow {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Fluent Design 三层阴影系统 */
+.shadow-fluent-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-fluent-md {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-fluent-lg {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* 渐变背景 */
