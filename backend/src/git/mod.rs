@@ -1,7 +1,7 @@
 // Git 自动化模块
 // 负责 Git 分支管理、自动提交和推送等操作
 
-use git2::{Repository, StatusOptions};
+use git2::{Repository, StatusOptions, BranchType};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use thiserror::Error;
@@ -18,6 +18,9 @@ pub enum GitError {
     #[error("分支 {0} 不存在")]
     BranchNotFound(String),
     
+    #[error("分支 {0} 已存在")]
+    BranchAlreadyExists(String),
+    
     #[error("无法找到 Git 仓库")]
     RepoNotFound,
     
@@ -29,9 +32,18 @@ pub enum GitError {
     
     #[error("命令执行失败: {0}")]
     CommandFailed(String),
+    
+    #[error("远程仓库 {0} 不存在")]
+    RemoteNotFound(String),
 }
 
 /// Git 自动化管理器
+/// 
+/// 提供 Git 仓库的自动化操作功能，包括：
+/// - 工作区状态验证
+/// - 分支创建和管理
+/// - 标签创建和管理
+/// - 远程推送操作
 pub struct GitAutomation {
     /// Git 仓库路径
     repo_path: PathBuf,
@@ -90,6 +102,11 @@ impl GitAutomation {
     ///
     /// # 返回
     /// * `Result<Self, GitError>` - 成功返回 GitAutomation 实例，失败返回错误
+    ///
+    /// # 示例
+    /// ```
+    /// let git = GitAutomation::new(".")?;
+    /// ```
     pub fn new<P: AsRef<Path>>(repo_path: P) -> Result<Self, GitError> {
         let repo_path = repo_path.as_ref().to_path_buf();
         
@@ -99,7 +116,47 @@ impl GitAutomation {
         Ok(Self { repo_path })
     }
     
+    /// 验证工作区是否干净（无未提交的更改）
+    ///
+    /// 这是任务 1.1 要求的核心方法之一。
+    /// 在执行任何 Git 操作前，必须先验证工作区状态。
+    ///
+    /// # 返回
+    /// * `Result<(), GitError>` - 工作区干净返回 Ok(())，否则返回 DirtyWorkingTree 错误
+    ///
+    /// # 错误
+    /// * `GitError::DirtyWorkingTree` - 工作区存在未提交的更改
+    /// * `GitError::RepositoryError` - Git 仓库操作失败
+    ///
+    /// # 示例
+    /// ```
+    /// let git = GitAutomation::new(".")?;
+    /// git.verify_clean_working_tree()?;
+    /// println!("工作区干净，可以继续操作");
+    /// ```
+    pub fn verify_clean_working_tree(&self) -> Result<(), GitError> {
+        let repo = Repository::open(&self.repo_path)?;
+        
+        // 获取工作区状态
+        let mut opts = StatusOptions::new();
+        opts.include_untracked(true);
+        opts.include_ignored(false);
+        
+        let statuses = repo.statuses(Some(&mut opts))?;
+        
+        // 如果状态列表不为空，说明有未提交的更改
+        if !statuses.is_empty() {
+            log::warn!("工作区不干净，存在 {} 个未提交的更改", statuses.len());
+            return Err(GitError::DirtyWorkingTree);
+        }
+        
+        log::info!("工作区验证通过：无未提交更改");
+        Ok(())
+    }
+    
     /// 检查工作区是否干净（无未提交的更改）
+    ///
+    /// 这是 verify_clean_working_tree 的布尔值版本，用于条件判断。
     ///
     /// # 返回
     /// * `Result<bool, GitError>` - true 表示工作区干净，false 表示有未提交更改
@@ -125,19 +182,154 @@ impl GitAutomation {
         Ok(statuses.is_empty())
     }
     
-    /// 创建备份标签
+    /// 创建新分支
+    ///
+    /// 这是任务 1.1 要求的核心方法之一。
+    /// 从当前 HEAD 创建新分支，但不切换到新分支。
+    ///
+    /// # 参数
+    /// * `branch_name` - 新分支的名称
+    ///
+    /// # 返回
+    /// * `Result<(), GitError>` - 成功返回 Ok(())，失败返回错误
+    ///
+    /// # 错误
+    /// * `GitError::BranchAlreadyExists` - 分支已存在
+    /// * `GitError::RepositoryError` - Git 仓库操作失败
+    ///
+    /// # 示例
+    /// ```
+    /// let git = GitAutomation::new(".")?;
+    /// git.create_branch("feature/new-feature")?;
+    /// println!("分支创建成功");
+    /// ```
+    pub fn create_branch(&self, branch_name: &str) -> Result<(), GitError> {
+        let repo = Repository::open(&self.repo_path)?;
+        
+        // 检查分支是否已存在
+        if repo.find_branch(branch_name, BranchType::Local).is_ok() {
+            log::warn!("分支 {} 已存在", branch_name);
+            return Err(GitError::BranchAlreadyExists(branch_name.to_string()));
+        }
+        
+        // 获取当前 HEAD 的 commit
+        let head = repo.head()?;
+        let commit = head.peel_to_commit()?;
+        
+        // 创建新分支（不切换）
+        repo.branch(branch_name, &commit, false)?;
+        
+        log::info!("成功创建分支: {}", branch_name);
+        Ok(())
+    }
+    
+    /// 添加 Git 标签
+    ///
+    /// 这是任务 1.1 要求的核心方法之一。
+    /// 在当前 HEAD 创建带注释的标签。
+    ///
+    /// # 参数
+    /// * `tag_name` - 标签名称
+    /// * `message` - 标签注释信息
+    ///
+    /// # 返回
+    /// * `Result<(), GitError>` - 成功返回 Ok(())，失败返回错误
+    ///
+    /// # 错误
+    /// * `GitError::RepositoryError` - Git 仓库操作失败
+    ///
+    /// # 示例
+    /// ```
+    /// let git = GitAutomation::new(".")?;
+    /// git.add_tag("v1.0.0-archived", "归档 v1 版本")?;
+    /// println!("标签创建成功");
+    /// ```
+    pub fn add_tag(&self, tag_name: &str, message: &str) -> Result<(), GitError> {
+        let repo = Repository::open(&self.repo_path)?;
+        
+        // 获取当前 HEAD 的 commit
+        let head = repo.head()?;
+        let commit = head.peel_to_commit()?;
+        
+        // 获取签名信息
+        let signature = repo.signature()?;
+        
+        // 创建带注释的标签
+        repo.tag(
+            tag_name,
+            commit.as_object(),
+            &signature,
+            message,
+            false, // 不覆盖已存在的标签
+        )?;
+        
+        log::info!("成功创建标签: {} ({})", tag_name, message);
+        Ok(())
+    }
+    
+    /// 推送到远程仓库
+    ///
+    /// 这是任务 1.1 要求的核心方法之一。
+    /// 推送指定分支和可选的标签到远程仓库。
+    ///
+    /// # 参数
+    /// * `branch` - 要推送的分支名称
+    /// * `tags` - 是否同时推送标签
+    ///
+    /// # 返回
+    /// * `Result<(), GitError>` - 成功返回 Ok(())，失败返回错误
+    ///
+    /// # 错误
+    /// * `GitError::BranchNotFound` - 分支不存在
+    /// * `GitError::RemoteNotFound` - 远程仓库不存在
+    /// * `GitError::RepositoryError` - Git 仓库操作失败
+    ///
+    /// # 示例
+    /// ```
+    /// let git = GitAutomation::new(".")?;
+    /// // 推送分支和标签
+    /// git.push_to_remote("main", true)?;
+    /// println!("推送成功");
+    /// ```
+    pub fn push_to_remote(&self, branch: &str, tags: bool) -> Result<(), GitError> {
+        let repo = Repository::open(&self.repo_path)?;
+        
+        // 验证分支是否存在
+        repo.find_branch(branch, BranchType::Local)
+            .map_err(|_| GitError::BranchNotFound(branch.to_string()))?;
+        
+        // 获取远程仓库（默认为 origin）
+        let mut remote = repo.find_remote("origin")
+            .map_err(|_| GitError::RemoteNotFound("origin".to_string()))?;
+        
+        // 构建推送引用规范
+        let mut refspecs = vec![format!("refs/heads/{}:refs/heads/{}", branch, branch)];
+        
+        // 如果需要推送标签，添加标签引用规范
+        if tags {
+            refspecs.push("refs/tags/*:refs/tags/*".to_string());
+        }
+        
+        // 执行推送
+        let mut push_options = git2::PushOptions::new();
+        remote.push(&refspecs, Some(&mut push_options))?;
+        
+        if tags {
+            log::info!("成功推送分支 {} 和所有标签到远程仓库", branch);
+        } else {
+            log::info!("成功推送分支 {} 到远程仓库", branch);
+        }
+        
+        Ok(())
+    }
+    
+    /// 创建备份标签（轻量级标签）
     ///
     /// # 参数
     /// * `tag_name` - 标签名称
     ///
     /// # 返回
     /// * `Result<(), GitError>` - 成功返回 ()，失败返回错误
-    ///
-    /// # 示例
-    /// ```
-    /// let git = GitAutomation::new(".")?;
-    /// git.create_backup_tag("master-backup-20260120")?;
-    /// ```
     pub fn create_backup_tag(&self, tag_name: &str) -> Result<(), GitError> {
         let repo = Repository::open(&self.repo_path)?;
         
@@ -256,9 +448,7 @@ impl GitAutomation {
     /// 5. 推送所有分支
     pub fn migrate_branches(&self, operation: BranchOperation) -> Result<(), GitError> {
         // 1. 验证工作区干净
-        if !self.check_working_tree_clean()? {
-            return Err(GitError::DirtyWorkingTree);
-        }
+        self.verify_clean_working_tree()?;
         
         let repo = Repository::open(&self.repo_path)?;
         
@@ -450,6 +640,7 @@ mod tests {
     use super::*;
     use std::env;
     
+    /// 测试工作区状态检查
     #[test]
     fn test_check_working_tree_clean() {
         // 注意：这个测试需要在实际的 Git 仓库中运行
@@ -462,10 +653,53 @@ mod tests {
         }
     }
     
+    /// 测试验证工作区方法
+    #[test]
+    fn test_verify_clean_working_tree() {
+        if let Ok(current_dir) = env::current_dir() {
+            if let Ok(git) = GitAutomation::new(&current_dir) {
+                // 验证方法可以调用
+                let _ = git.verify_clean_working_tree();
+            }
+        }
+    }
+    
+    /// 测试无效路径
     #[test]
     fn test_new_with_invalid_path() {
         // 测试无效路径
         let result = GitAutomation::new("/nonexistent/path");
         assert!(result.is_err());
+    }
+    
+    /// 测试提交类型转换
+    #[test]
+    fn test_commit_type_as_str() {
+        assert_eq!(CommitType::Feat.as_str(), "feat");
+        assert_eq!(CommitType::Fix.as_str(), "fix");
+        assert_eq!(CommitType::Perf.as_str(), "perf");
+        assert_eq!(CommitType::Chore.as_str(), "chore");
+    }
+    
+    /// 测试提交信息生成
+    #[test]
+    fn test_generate_commit_message() {
+        let config = CommitConfig {
+            commit_type: CommitType::Feat,
+            description: "实现 Git 自动化模块".to_string(),
+            details: Some("添加分支创建和标签管理功能".to_string()),
+        };
+        
+        let message = GitAutomation::generate_commit_message(&config);
+        assert_eq!(message, "[feat] 实现 Git 自动化模块 - 添加分支创建和标签管理功能");
+        
+        let config_no_details = CommitConfig {
+            commit_type: CommitType::Fix,
+            description: "修复工作区验证问题".to_string(),
+            details: None,
+        };
+        
+        let message_no_details = GitAutomation::generate_commit_message(&config_no_details);
+        assert_eq!(message_no_details, "[fix] 修复工作区验证问题");
     }
 }

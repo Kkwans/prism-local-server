@@ -8,7 +8,7 @@ export default defineConfig({
   
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./frontend"),
     },
   },
 
@@ -53,8 +53,8 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
     watch: {
-      // 3. 告诉 vite 忽略监视 `src-tauri`
-      ignored: ["**/src-tauri/**"],
+      // 3. 告诉 vite 忽略监视 backend
+      ignored: ["**/backend/**"],
     },
   },
 });

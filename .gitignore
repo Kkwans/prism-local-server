@@ -10,7 +10,7 @@ target/
 Cargo.lock
 
 # Tauri
-src-tauri/target/
+backend/target/
 
 # Build outputs
 dist/

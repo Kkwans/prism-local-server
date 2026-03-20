@@ -134,7 +134,7 @@ npm run tauri dev
 npm run dev
 
 # 终端 2: 启动 Tauri 开发模式
-cd src-tauri
+cd backend
 cargo tauri dev
 ```
 
@@ -158,7 +158,7 @@ PowerShell:
 npm run lint
 
 # 检查 Rust 代码
-cd src-tauri
+cd backend
 cargo check
 
 # 运行 Clippy（Rust 代码质量检查）
@@ -200,7 +200,7 @@ PowerShell:
 npm run build
 
 # 步骤 2: 构建 Rust 后端
-cd src-tauri
+cd backend
 cargo build --release
 
 # 步骤 3: 打包应用
@@ -218,7 +218,7 @@ powershell -ExecutionPolicy Bypass -File ./scripts/post-build.ps1
 ```
 prism-local-server-tauri/
 ├── prism-local-server-v3.0.0.exe          # 便携版 EXE（根目录）
-└── src-tauri/target/release/
+└── backend/target/release/
     ├── prism-local-server-tauri.exe       # 原始 EXE
     └── bundle/
         ├── msi/
@@ -296,7 +296,7 @@ Tailwind 已配置为仅包含使用的样式：
 ```javascript
 content: [
   "./index.html",
-  "./src/**/*.{js,ts,jsx,tsx}",
+  "./frontend/**/*.{js,ts,jsx,tsx}",
 ]
 ```
 
@@ -318,7 +318,7 @@ content: [
 2. **移除未使用的依赖**:
    ```powershell
    # 分析依赖树
-   cd src-tauri
+   cd backend
    cargo tree
    
    # 移除未使用的 features
@@ -363,7 +363,7 @@ content: [
 - 支持卸载和更新
 
 **使用方法**:
-1. 使用 `src-tauri/target/release/bundle/nsis/Prism Local Server_3.0.0_x64-setup.exe`
+1. 使用 `backend/target/release/bundle/nsis/Prism Local Server_3.0.0_x64-setup.exe`
 2. 双击运行安装程序
 3. 按照向导完成安装
 4. 从开始菜单启动应用
@@ -381,7 +381,7 @@ C:\Program Files\Prism Local Server\
 - 符合企业 IT 标准
 
 **使用方法**:
-1. 使用 `src-tauri/target/release/bundle/msi/Prism Local Server_3.0.0_x64_en-US.msi`
+1. 使用 `backend/target/release/bundle/msi/Prism Local Server_3.0.0_x64_en-US.msi`
 2. 双击运行或使用命令行静默安装
 
 **静默安装**:
@@ -446,7 +446,7 @@ msiexec /i "Prism Local Server_3.0.0_x64_en-US.msi" /quiet /norestart
 构建完成后自动执行：
 
 1. 从 `Cargo.toml` 读取版本号
-2. 复制 `src-tauri/target/release/prism-local-server-tauri.exe` 到根目录
+2. 复制 `backend/target/release/prism-local-server-tauri.exe` 到根目录
 3. 重命名为 `prism-local-server-v{version}.exe`
 4. 显示文件大小
 
@@ -575,7 +575,7 @@ panic = "unwind"  # 默认值，Panic 时展开堆栈
 1. **移除未使用的依赖**:
    ```powershell
    # 分析依赖
-   cd src-tauri
+   cd backend
    cargo tree
    
    # 使用 cargo-udeps 查找未使用的依赖
@@ -592,7 +592,7 @@ panic = "unwind"  # 默认值，Panic 时展开堆栈
 3. **使用 cargo-bloat 分析体积**:
    ```powershell
    cargo install cargo-bloat
-   cd src-tauri
+   cd backend
    cargo bloat --release
    ```
 
@@ -607,7 +607,7 @@ panic = "unwind"  # 默认值，Panic 时展开堆栈
 PowerShell:
 ```powershell
 # 清理缓存
-cd src-tauri
+cd backend
 cargo clean
 
 # 更新依赖
@@ -714,8 +714,8 @@ jobs:
         name: prism-local-server-windows
         path: |
           prism-local-server-v*.exe
-          src-tauri/target/release/bundle/msi/*.msi
-          src-tauri/target/release/bundle/nsis/*.exe
+          backend/target/release/bundle/msi/*.msi
+          backend/target/release/bundle/nsis/*.exe
 ```
 
 ---
@@ -726,8 +726,8 @@ jobs:
 
 编辑以下文件：
 - `package.json`: `"version": "3.0.1"`
-- `src-tauri/Cargo.toml`: `version = "3.0.1"`
-- `src-tauri/tauri.conf.json`: `"version": "3.0.1"`
+- `backend/Cargo.toml`: `version = "3.0.1"`
+- `backend/tauri.conf.json`: `"version": "3.0.1"`
 
 ### 2. 更新 CHANGELOG
 
@@ -742,7 +742,7 @@ npm run tauri:build
 
 # 验证构建产物
 Get-ChildItem prism-local-server-v*.exe
-Get-ChildItem src-tauri/target/release/bundle/
+Get-ChildItem backend/target/release/bundle/
 ```
 
 ### 4. 创建 Git Tag

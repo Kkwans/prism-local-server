@@ -6,6 +6,7 @@ pub mod config;
 pub mod server;
 pub mod commands;
 pub mod git;
+pub mod migration;
 
 use server::manager::ServerManager;
 use config::manager::ConfigManager;

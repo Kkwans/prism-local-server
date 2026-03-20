@@ -72,3 +72,35 @@ pub enum ConfigError {
     #[error("序列化错误: {0}")]
     SerdeError(#[from] serde_json::Error),
 }
+
+/// 应用程序通用错误类型
+#[derive(Debug, Error)]
+pub enum AppError {
+    /// 目录不存在
+    #[error("目录不存在: {0}")]
+    DirectoryNotFound(String),
+    
+    /// 目录已存在
+    #[error("目录已存在: {0}")]
+    DirectoryAlreadyExists(String),
+    
+    /// 配置文件不存在
+    #[error("配置文件不存在: {0}")]
+    ConfigNotFound(String),
+    
+    /// 迁移验证失败
+    #[error("迁移验证失败，请检查上述错误信息")]
+    MigrationVerificationFailed,
+    
+    /// IO 错误
+    #[error("IO 错误: {0}")]
+    Io(#[from] std::io::Error),
+    
+    /// 服务器错误
+    #[error("服务器错误: {0}")]
+    Server(#[from] ServerError),
+    
+    /// 配置错误
+    #[error("配置错误: {0}")]
+    Config(#[from] ConfigError),
+}

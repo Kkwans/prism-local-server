@@ -9,8 +9,8 @@
 
 ✅ 构建产物已准备：
 - [x] `prism-local-server-v3.0.0.exe` (4.72 MB) - 根目录
-- [x] `Prism Local Server_3.0.0_x64_en-US.msi` (2.43 MB) - src-tauri/target/release/bundle/msi/
-- [x] `Prism Local Server_3.0.0_x64-setup.exe` (1.74 MB) - src-tauri/target/release/bundle/nsis/
+- [x] `Prism Local Server_3.0.0_x64_en-US.msi` (2.43 MB) - backend/target/release/bundle/msi/
+- [x] `Prism Local Server_3.0.0_x64-setup.exe` (1.74 MB) - backend/target/release/bundle/nsis/
 
 ---
 
@@ -61,12 +61,12 @@ Get-Content RELEASE_v3.0.0.md | Set-Clipboard
 - **说明**: 无需安装，双击即用
 
 #### 文件 2：MSI 安装包
-- **路径**: `prism-local-server-tauri/src-tauri/target/release/bundle/msi/Prism Local Server_3.0.0_x64_en-US.msi`
+- **路径**: `prism-local-server-tauri/backend/target/release/bundle/msi/Prism Local Server_3.0.0_x64_en-US.msi`
 - **大小**: 2.43 MB
 - **说明**: Windows Installer 标准安装包
 
 #### 文件 3：NSIS 安装包
-- **路径**: `prism-local-server-tauri/src-tauri/target/release/bundle/nsis/Prism Local Server_3.0.0_x64-setup.exe`
+- **路径**: `prism-local-server-tauri/backend/target/release/bundle/nsis/Prism Local Server_3.0.0_x64-setup.exe`
 - **大小**: 1.74 MB
 - **说明**: 自定义安装向导
 
