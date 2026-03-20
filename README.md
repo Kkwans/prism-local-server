@@ -1,5 +1,18 @@
 # Prism Local Server (Flet版本)
 
+> **⚠️ 废弃声明：v2 版本 - 已废弃，不再开发**
+> 
+> 本分支为 Prism Local Server v2 版本的归档代码（基于 Python + Flet）。
+> 该版本已停止维护和开发，仅作为历史记录保留。
+> 
+> 请使用最新的 v3 版本（基于 Tauri + Rust + React），性能更优、体积更小。
+> 
+> - 当前分支：`flet-v2`（归档）
+> - 开发分支：`tauri-v3`
+> - 稳定分支：`main`
+
+---
+
 基于Flet (Flutter) 的现代化前端静态文件部署工具
 
 ## 特性
