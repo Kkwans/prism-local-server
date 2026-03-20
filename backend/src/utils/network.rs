@@ -1,21 +1,38 @@
 /// 网络工具模块
 /// 提供网络相关的工具函数，如获取本机 IP 地址
 
-use local_ip_address::local_ip;
+use local_ip_address::{local_ip, list_afinet_netifas};
 
 /// 获取本机所有 IP 地址
 /// 
 /// # 返回
-/// * `Vec<String>` - IP 地址列表
+/// * `Vec<String>` - IP 地址列表（过滤掉回环地址和链路本地地址）
 pub fn get_local_ip_addresses() -> Vec<String> {
     let mut ips = Vec::new();
     
-    // 获取主要的本地 IP
-    if let Ok(ip) = local_ip() {
-        let ip_str = ip.to_string();
-        // 过滤掉回环地址
-        if !ip_str.starts_with("127.") && !ip_str.starts_with("::1") {
-            ips.push(ip_str);
+    // 尝试获取所有网络接口
+    if let Ok(network_interfaces) = list_afinet_netifas() {
+        for (_name, ip) in network_interfaces {
+            let ip_str = ip.to_string();
+            // 过滤掉回环地址和链路本地地址
+            if !ip_str.starts_with("127.") 
+                && !ip_str.starts_with("::1") 
+                && !ip_str.starts_with("169.254.") 
+                && !ip_str.starts_with("fe80:") {
+                if !ips.contains(&ip_str) {
+                    ips.push(ip_str);
+                }
+            }
+        }
+    }
+    
+    // 如果上面的方法失败，使用备用方法
+    if ips.is_empty() {
+        if let Ok(ip) = local_ip() {
+            let ip_str = ip.to_string();
+            if !ip_str.starts_with("127.") && !ip_str.starts_with("::1") {
+                ips.push(ip_str);
+            }
         }
     }
     

@@ -18,7 +18,11 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
-        "transparent": false
+        "transparent": true,
+        "windowEffects": {
+          "state": "active",
+          "effects": ["mica"]
+        }
       }
     ],
     "security": {

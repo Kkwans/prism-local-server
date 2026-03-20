@@ -5,7 +5,7 @@ use crate::models::{ServerConfig, ServerInfo, ServerStatus};
 use crate::server::handler::handle_static_file;
 use crate::server::namer::ServiceNamer;
 use crate::server::data_share::{DataShareLayer, SharedData};
-use crate::utils::network::get_primary_lan_ip;
+use crate::utils::network::get_local_ip_addresses;
 use crate::utils::port::{check_port_availability, find_available_port};
 use axum::Router;
 use std::collections::HashMap;
@@ -82,12 +82,14 @@ impl ServerManager {
         // 生成服务名称（从目录路径提取）
         let service_name = self.namer.generate_service_name(&config.directory);
 
-        // 获取局域网 IP
-        let lan_ip = get_primary_lan_ip().unwrap_or_else(|| "127.0.0.1".to_string());
+        // 获取所有局域网 IP 地址
+        let lan_ips = get_local_ip_addresses();
 
-        // 构造访问地址
+        // 构造访问地址（包含所有网络接口）
         let local_url = format!("http://127.0.0.1:{}/{}", port, config.entry_file);
-        let lan_urls = vec![format!("http://{}:{}/{}", lan_ip, port, config.entry_file)];
+        let lan_urls: Vec<String> = lan_ips.iter()
+            .map(|ip| format!("http://{}:{}/{}", ip, port, config.entry_file))
+            .collect();
 
         // 创建服务器信息
         let server_info = ServerInfo {
@@ -298,8 +300,12 @@ async fn start_http_server(
     // 启动服务器
     let listener = tokio::net::TcpListener::bind(addr).await?;
     
+    // 配置 TCP_NODELAY 优化网络传输
+    listener.set_ttl(64)?;
+    
     // 使用 with_graceful_shutdown 支持优雅关闭
     axum::serve(listener, app)
+        .tcp_nodelay(true) // 启用 TCP_NODELAY，减少延迟
         .with_graceful_shutdown(async {
             shutdown_rx.await.ok();
         })

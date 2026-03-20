@@ -37,3 +37,8 @@ logs/
 
 # Build artifacts - Root level EXE files
 prism-local-server-v*.exe
+
+# Release folder - 保留打包文件用于发布
+!release/
+!release/*.exe
+!release/*.msi
