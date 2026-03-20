@@ -1,4 +1,4 @@
-import { useState, useCallback, memo, useEffect } from 'react';
+import { useState, useCallback, memo, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ServerCard } from './ServerCard';
 import { SettingsDialog } from './SettingsDialog';
@@ -16,11 +16,22 @@ export const Dashboard = memo(function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [directory, setDirectory] = useState('');
   const [port, setPort] = useState(8888);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
+
+  // 防抖刷新：限制刷新频率为 500ms
+  const handleRefresh = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRefreshTime < 500) {
+      return; // 忽略过于频繁的刷新请求
+    }
+    setLastRefreshTime(now);
+    refreshServerList();
+  }, [lastRefreshTime, refreshServerList]);
 
   // 应用启动时刷新服务列表
   useEffect(() => {
-    refreshServerList();
-  }, [refreshServerList]);
+    handleRefresh();
+  }, [handleRefresh]);
 
   // 配置加载后自动填充到主界面(仅在输入框为空时)
   useEffect(() => {
@@ -53,11 +64,21 @@ export const Dashboard = memo(function Dashboard() {
     };
 
     try {
-      await startServer(serverConfig);
-      toast({
-        title: "启动成功",
-        description: `服务已在端口 ${port} 上启动`,
-      });
+      const serverInfo = await startServer(serverConfig);
+      
+      // 检测端口是否发生变更
+      if (serverInfo.port !== port) {
+        toast({
+          title: "端口已自动调整",
+          description: `原端口 ${port} 被占用，已自动切换到端口 ${serverInfo.port}`,
+        });
+      } else {
+        toast({
+          title: "启动成功",
+          description: `服务已在端口 ${serverInfo.port} 上启动`,
+        });
+      }
+      
       // 清空输入
       setDirectory('');
       setPort(8888);
@@ -70,6 +91,22 @@ export const Dashboard = memo(function Dashboard() {
     }
   }, [directory, port, config, startServer, toast]);
 
+  // 使用 useMemo 缓存空状态组件，避免不必要的重渲染
+  const emptyState = useMemo(() => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.25 }}
+      className="glass rounded-xl p-12 text-center"
+    >
+      <div className="text-6xl mb-4">🚀</div>
+      <h3 className="text-xl font-semibold mb-2">暂无运行中的服务</h3>
+      <p className="text-muted-foreground">
+        点击上方"启动服务"按钮来部署你的第一个本地服务器
+      </p>
+    </motion.div>
+  ), []);
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -78,6 +115,7 @@ export const Dashboard = memo(function Dashboard() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
             className="flex items-center gap-4"
           >
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
@@ -94,10 +132,14 @@ export const Dashboard = memo(function Dashboard() {
           </motion.div>
           
           <div className="flex gap-3">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+            >
               <Button
                 variant="outline"
-                onClick={refreshServerList}
+                onClick={handleRefresh}
                 disabled={isLoading}
                 className="shadow-sm hover:shadow-md transition-shadow"
               >
@@ -108,7 +150,11 @@ export const Dashboard = memo(function Dashboard() {
               </Button>
             </motion.div>
             
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+            >
               <Button
                 variant="secondary"
                 onClick={() => setShowSettings(true)}
@@ -128,11 +174,12 @@ export const Dashboard = memo(function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
           className="glass rounded-2xl p-8 mb-8 card-shadow"
+          style={{ willChange: 'transform' }}
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
@@ -141,7 +188,7 @@ export const Dashboard = memo(function Dashboard() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
+            <div className="flex-shrink-0">
               <label className="block text-sm font-medium text-foreground mb-2">部署目录</label>
               <div className="flex items-center gap-3">
                 <input
@@ -149,9 +196,14 @@ export const Dashboard = memo(function Dashboard() {
                   value={directory}
                   onChange={(e) => setDirectory(e.target.value)}
                   placeholder="选择要部署的目录"
-                  className="flex-1 px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm h-12"
+                  className="flex-1 px-4 py-3 bg-white rounded-xl border-2 border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm h-12 min-w-0"
                 />
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div 
+                  whileHover={{ scale: 1.03 }} 
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex-shrink-0"
+                >
                   <Button
                     variant="outline"
                     onClick={async () => {
@@ -169,7 +221,7 @@ export const Dashboard = memo(function Dashboard() {
                         });
                       }
                     }}
-                    className="h-12 px-6 shadow-sm hover:shadow-md transition-all rounded-xl border-2 flex items-center justify-center"
+                    className="h-12 px-6 shadow-sm hover:shadow-md transition-all rounded-xl border-2 flex items-center justify-center w-[100px]"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -180,7 +232,7 @@ export const Dashboard = memo(function Dashboard() {
               </div>
             </div>
 
-            <div>
+            <div className="flex-shrink-0">
               <label className="block text-sm font-medium text-foreground mb-2">端口号</label>
               <input
                 type="number"
@@ -193,7 +245,13 @@ export const Dashboard = memo(function Dashboard() {
             </div>
           </div>
 
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="flex-shrink-0"
+            style={{ willChange: 'transform' }}
+          >
             <Button
               onClick={handleStartServer}
               disabled={isLoading}
@@ -213,7 +271,7 @@ export const Dashboard = memo(function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
@@ -243,21 +301,11 @@ export const Dashboard = memo(function Dashboard() {
               ))}
             </div>
           ) : servers.length === 0 ? (
-            // 空状态
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass rounded-xl p-12 text-center"
-            >
-              <div className="text-6xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold mb-2">暂无运行中的服务</h3>
-              <p className="text-muted-foreground">
-                点击上方"启动服务"按钮来部署你的第一个本地服务器
-              </p>
-            </motion.div>
+            // 空状态 - 使用缓存的组件
+            emptyState
           ) : (
             // 服务列表
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
               <AnimatePresence mode="popLayout">
                 {servers.map((server, index) => (
                   <motion.div
@@ -265,7 +313,7 @@ export const Dashboard = memo(function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
                   >
                     <ServerCard
                       server={server}

@@ -109,31 +109,31 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
       >
-        <Card className="glass card-shadow hover:shadow-xl transition-all duration-300 border-2">
-          <CardContent className="p-6">
+        <Card className="glass card-shadow hover:shadow-xl transition-all duration-300 border-2 min-h-[200px]">
+          <CardContent className="p-4">
             {/* 头部：服务名称和状态 */}
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground" title={server.name}>
+                  <h3 className="text-base font-semibold text-foreground truncate max-w-[200px]" title={server.name}>
                     {server.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground">端口: {server.port}</p>
+                  <p className="text-xs text-muted-foreground">端口: {server.port}</p>
                 </div>
               </div>
-              <span className="status-badge px-4 py-2 text-white rounded-full text-sm font-medium flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+              <span className="status-badge px-3 py-1.5 text-white rounded-full text-xs font-medium flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                 运行中
               </span>
             </div>
 
             {/* 服务信息 */}
-            <div className="space-y-3 mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+            <div className="space-y-2 mb-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
               <div className="flex items-start gap-2">
                 <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -201,7 +201,11 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
 
             {/* 操作按钮 */}
             <div className="grid grid-cols-2 gap-3">
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <motion.div 
+                whileHover={{ scale: 1.03 }} 
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Button
                   variant="outline"
                   size="sm"
@@ -215,7 +219,11 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
                 </Button>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <motion.div 
+                whileHover={{ scale: 1.03 }} 
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Button
                   variant="outline"
                   size="sm"
@@ -229,7 +237,11 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
                 </Button>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <motion.div 
+                whileHover={{ scale: 1.03 }} 
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Button
                   variant="secondary"
                   size="sm"
@@ -243,7 +255,11 @@ export const ServerCard = memo(function ServerCard({ server, onStop, onRestart }
                 </Button>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <motion.div 
+                whileHover={{ scale: 1.03 }} 
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Button
                   variant="destructive"
                   size="sm"
