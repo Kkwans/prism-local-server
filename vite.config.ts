@@ -25,16 +25,22 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
-    // 代码分割优化
+    // 代码分割优化 - Vite 8.0 使用函数形式
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // 将 React 相关库分离到单独的 chunk
-          'react-vendor': ['react', 'react-dom'],
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor';
+          }
           // 将 UI 组件库分离
-          'ui-vendor': ['framer-motion', 'zustand'],
+          if (id.includes('node_modules/framer-motion') || id.includes('node_modules/zustand')) {
+            return 'ui-vendor';
+          }
           // 将 Tauri API 分离
-          'tauri-vendor': ['@tauri-apps/api', '@tauri-apps/plugin-opener'],
+          if (id.includes('node_modules/@tauri-apps')) {
+            return 'tauri-vendor';
+          }
         },
       },
     },
