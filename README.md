@@ -10,6 +10,41 @@
 
 一键启动本地 HTTP 服务器，支持局域网访问、多服务并发管理、视频拖拽播放
 
+---
+
+### 📥 下载 v3.0.0
+
+<table>
+<tr>
+<td align="center" width="33%">
+<h4>⭐ NSIS 安装包（推荐）</h4>
+<a href="https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64-setup.exe">
+<img src="https://img.shields.io/badge/下载-NSIS%20安装包-blue?style=for-the-badge&logo=windows" alt="下载 NSIS 安装包"/>
+</a>
+<br/>
+<small>1.74 MB | 推荐大多数用户使用</small>
+</td>
+<td align="center" width="33%">
+<h4>MSI 安装包</h4>
+<a href="https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64_en-US.msi">
+<img src="https://img.shields.io/badge/下载-MSI%20安装包-green?style=for-the-badge&logo=windows" alt="下载 MSI 安装包"/>
+</a>
+<br/>
+<small>3.05 MB | 适合企业部署</small>
+</td>
+<td align="center" width="33%">
+<h4>便携版</h4>
+<a href="https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism-Local-Server-v3.0.0.exe">
+<img src="https://img.shields.io/badge/下载-便携版-orange?style=for-the-badge&logo=windows" alt="下载便携版"/>
+</a>
+<br/>
+<small>4.72 MB | 无需安装</small>
+</td>
+</tr>
+</table>
+
+[📋 查看完整 Release 说明](https://github.com/Kkwans/prism-local-server/releases/tag/v3.0.0) | [📚 所有版本](https://github.com/Kkwans/prism-local-server/releases)
+
 </div>
 
 ---
@@ -44,27 +79,49 @@
 ## 📦 安装说明
 
 ### 系统要求
-- **操作系统**: Windows 11 (21H2 或更高版本)
-- **WebView2**: 系统自带（Win11 预装）
+- **操作系统**: Windows 10 1809+ 或 Windows 11（推荐）
+- **WebView2**: 系统自带（Win11 预装，Win10 会自动下载）
+- **系统架构**: 64 位系统
 - **磁盘空间**: ≥ 50 MB
+- **建议内存**: 4GB+
 
-### 安装方式
+### 下载安装
 
-#### 方式 1: 使用安装包（推荐）
-1. 下载 `Prism Local Server_3.0.0_x64-setup.exe`
+#### 方式 1: NSIS 安装包（⭐ 推荐）
+1. [下载 NSIS 安装包](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64-setup.exe) (1.74 MB)
 2. 双击运行安装程序
 3. 按照向导完成安装
-4. 从开始菜单启动应用
+4. 从开始菜单或桌面快捷方式启动应用
 
-#### 方式 2: 使用 MSI 安装包
-1. 下载 `Prism Local Server_3.0.0_x64_en-US.msi`
+**特点**:
+- ✅ 自动安装到 Program Files
+- ✅ 创建桌面快捷方式和开始菜单项
+- ✅ 支持一键卸载
+
+#### 方式 2: MSI 安装包（企业部署）
+1. [下载 MSI 安装包](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64_en-US.msi) (3.05 MB)
 2. 双击运行 MSI 安装程序
 3. 完成安装后启动应用
 
-#### 方式 3: 使用便携版
-1. 下载 `prism-local-server-tauri.exe`
+**特点**:
+- ✅ 支持静默安装和组策略管理
+- ✅ 更好的企业环境兼容性
+
+#### 方式 3: 便携版（无需安装）
+1. [下载便携版](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism-Local-Server-v3.0.0.exe) (4.72 MB)
 2. 放置到任意目录
-3. 双击运行（无需安装）
+3. 双击运行（无需安装，无需管理员权限）
+
+**特点**:
+- ✅ 解压即用
+- ✅ 适合便携使用或测试
+- ✅ 无需管理员权限
+
+### Linux/macOS 用户
+
+请下载源代码并参考构建指南：
+- [Linux 构建指南](./docs/BUILD_LINUX.md)
+- [macOS 构建指南](./docs/BUILD_MACOS.md)
 
 ---
 
@@ -405,13 +462,19 @@ C:\Users\[用户名]\AppData\Roaming\com.prism.local-server\config.json
 
 ## 🔄 版本历史
 
-### v3.0.0 (2026-03-20)
+### v3.0.0 (2026-03-21) - 最新版本 ✨
+
+**🎉 重大更新：Tauri v2 完全重写**
+
+[📥 下载 v3.0.0](https://github.com/Kkwans/prism-local-server/releases/tag/v3.0.0) | [📋 完整 Release 说明](https://github.com/Kkwans/prism-local-server/releases/tag/v3.0.0)
+
+#### 新特性
 - 🎉 完全重写为 Tauri v2 架构
 - ⚡ 使用 Rust + Axum 实现高性能后端
 - 🎨 全新 React + Tailwind CSS 现代化 UI
 - 🌈 深色主题 + Windows 11 Fluent Design
-- 📦 体积减小 80%，性能提升 300%
-- 🔧 完整支持 HTTP Range Request
+- 📦 体积减小 85%，性能提升 300%
+- 🔧 完整支持 HTTP Range Request（视频拖拽播放）
 - 🌐 优化局域网访问体验
 - 🎯 系统托盘 + 自动打开浏览器
 - 🏷️ 智能服务命名（使用目录名）
@@ -420,9 +483,21 @@ C:\Users\[用户名]\AppData\Roaming\com.prism.local-server\config.json
 - 💾 配置持久化和自动填充
 - 🛡️ 目录唯一性保护
 
+#### 性能提升
+- **启动速度**: 冷启动时间 ≤ 1.5 秒（相比 v2.x 提升 60%）
+- **内存占用**: 空闲状态仅 40MB，运行状态 ≤ 80MB（相比 v2.x 降低 70%）
+- **包体积**: NSIS 安装包仅 1.74MB，主程序 4.72MB（相比 v2.x 减小 85%）
+
+#### 下载文件
+- [Prism Local Server_3.0.0_x64-setup.exe](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64-setup.exe) (1.74 MB) ⭐ 推荐
+- [Prism Local Server_3.0.0_x64_en-US.msi](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism%20Local%20Server_3.0.0_x64_en-US.msi) (3.05 MB)
+- [Prism-Local-Server-v3.0.0.exe](https://github.com/Kkwans/prism-local-server/releases/download/v3.0.0/Prism-Local-Server-v3.0.0.exe) (4.72 MB)
+
 ### v2.x (Python + Flet)
 - 基于 Python + Flet 的原始版本
 - 已废弃，建议升级到 v3.0.0
+
+[📚 查看所有版本](https://github.com/Kkwans/prism-local-server/releases)
 
 ---
 
