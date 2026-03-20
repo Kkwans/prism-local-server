@@ -19,85 +19,85 @@ from utils.network_utils import NetworkUtils
 from ui.settings_dialog import SettingsDialog
 
 
-class ServiceCard:
+@ft.control
+class ServiceCard(ft.Container):
     """服务卡片组件"""
     
-    def __init__(self, service: ServiceInstance, on_stop, on_open):
+    service: ServiceInstance = None
+    on_stop: callable = None
+    on_open: callable = None
+    
+    def init(self):
         """初始化服务卡片"""
-        self.service = service
-        self.on_stop = on_stop
-        self.on_open = on_open
-        
         # 运行时长文本
         self.uptime_text = ft.Text(
-            f"运行时长: {service.getUptime()}",
+            f"运行时长: {self.service.getUptime()}",
             size=12,
             color=ft.Colors.GREY_600
         )
         
-        # 创建卡片容器
-        self.container = ft.Container(
-            content=ft.Row(
-                controls=[
-                    # 左侧信息区域
-                    ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                # 状态和端口
-                                ft.Row(
-                                    controls=[
-                                        ft.Icon(
-                                            "circle",
-                                            color=ft.Colors.GREEN_600,
-                                            size=12
-                                        ),
-                                        ft.Text(
-                                            "运行中",
-                                            size=14,
-                                            weight=ft.FontWeight.BOLD,
-                                            color=ft.Colors.GREEN_700
-                                        ),
-                                        ft.Container(width=10),
-                                        ft.Text(
-                                            f"端口 {service.port}",
-                                            size=14,
-                                            weight=ft.FontWeight.BOLD
-                                        ),
-                                        ft.Container(width=10),
-                                        self.uptime_text
-                                    ],
-                                    spacing=5
-                                ),
-                                # 目录路径
-                                ft.Row(
-                                    controls=[
-                                        ft.Icon(
-                                            "folder_outlined",
-                                            size=16,
-                                            color=ft.Colors.GREY_600
-                                        ),
-                                        ft.Text(
-                                            service.directory,
-                                            size=12,
-                                            color=ft.Colors.GREY_700
-                                        )
-                                    ],
-                                    spacing=5
-                                ),
-                                # 访问地址
-                                ft.Row(
-                                    controls=[
-                                        ft.Icon(
-                                            "language",
-                                            size=16,
-                                            color=ft.Colors.BLUE_600
-                                        ),
-                                        ft.Text(
-                                            NetworkUtils.generateLocalURL(service.port, service.entry_html),
-                                            size=12,
-                                            color=ft.Colors.BLUE_700
-                                        )
-                                    ],
+        # 设置容器属性
+        self.content = ft.Row(
+            controls=[
+                # 左侧信息区域
+                ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            # 状态和端口
+                            ft.Row(
+                                controls=[
+                                    ft.Icon(
+                                        "circle",
+                                        color=ft.Colors.GREEN_600,
+                                        size=12
+                                    ),
+                                    ft.Text(
+                                        "运行中",
+                                        size=14,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.GREEN_700
+                                    ),
+                                    ft.Container(width=10),
+                                    ft.Text(
+                                        f"端口 {self.service.port}",
+                                        size=14,
+                                        weight=ft.FontWeight.BOLD
+                                    ),
+                                    ft.Container(width=10),
+                                    self.uptime_text
+                                ],
+                                spacing=5
+                            ),
+                            # 目录路径
+                            ft.Row(
+                                controls=[
+                                    ft.Icon(
+                                        "folder_outlined",
+                                        size=16,
+                                        color=ft.Colors.GREY_600
+                                    ),
+                                    ft.Text(
+                                        self.service.directory,
+                                        size=12,
+                                        color=ft.Colors.GREY_700
+                                    )
+                                ],
+                                spacing=5
+                            ),
+                            # 访问地址
+                            ft.Row(
+                                controls=[
+                                    ft.Icon(
+                                        "language",
+                                        size=16,
+                                        color=ft.Colors.BLUE_600
+                                    ),
+                                    ft.Text(
+                                        NetworkUtils.generateLocalURL(self.service.port, self.service.entry_html),
+                                        size=12,
+                                        color=ft.Colors.BLUE_700
+                                    )
+                                ],
                                     spacing=5
                                 )
                             ],
@@ -115,8 +115,8 @@ class ServiceCard:
                                     icon="open_in_browser",
                                     on_click=lambda _: self.on_open(service),
                                     style=ft.ButtonStyle(
-                                        bgcolor=ft.Colors.SURFACE_CONTAINER,
-                                        color=ft.Colors.ON_SURFACE
+                                        bgcolor=ft.Colors.SURFACE_VARIANT,
+                                        color=ft.Colors.ON_SURFACE_VARIANT
                                     )
                                 ),
                                 ft.Button(
@@ -136,7 +136,7 @@ class ServiceCard:
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             ),
-            bgcolor=ft.Colors.SURFACE_CONTAINER,
+            bgcolor=ft.Colors.SURFACE_VARIANT,
             border_radius=12,
             margin=ft.margin.only(bottom=12),
             animate=ft.animation.Animation(300, ft.AnimationCurve.EASE_OUT)
@@ -223,7 +223,7 @@ class HomeView:
                 expand=True
             ),
             expand=True,
-            bgcolor=ft.Colors.SURFACE
+            bgcolor=ft.Colors.BACKGROUND
         )
         
         # 启动定时器更新运行时长
@@ -258,7 +258,7 @@ class HomeView:
                 ],
                 alignment=ft.MainAxisAlignment.START
             ),
-            bgcolor=ft.Colors.SURFACE_CONTAINER,
+            bgcolor=ft.Colors.SURFACE_VARIANT,
             padding=ft.padding.symmetric(horizontal=24, vertical=16)
         )
     
