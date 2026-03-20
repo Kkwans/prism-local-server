@@ -162,6 +162,10 @@
 └─────────────────────────────────────────┘
 ```
 
+**目录结构说明**:
+- 📁 `src/` - **React 前端代码**（UI 组件、状态管理、用户交互）
+- 📁 `src-tauri/` - **Rust 后端代码**（业务逻辑、文件 IO、网络操作、系统调用）
+
 **关键设计原则**:
 - ✅ **前端**: 纯 UI 渲染与状态管理，通过 Tauri IPC 调用后端
 - ✅ **后端**: 所有业务逻辑、文件操作、网络操作在 Rust 中实现
@@ -184,6 +188,17 @@
 - `components/SettingsDialog.tsx`: 设置对话框
 - `stores/useServerStore.ts`: 服务状态管理
 - `stores/useConfigStore.ts`: 配置状态管理
+
+---
+
+## 📚 文档
+
+| 文档 | 说明 |
+|------|------|
+| [用户指南 (USER_GUIDE.md)](./USER_GUIDE.md) | 详细的使用说明、功能介绍、常见问题解答 |
+| [构建指南 (BUILD_GUIDE.md)](./BUILD_GUIDE.md) | 开发环境配置、构建流程、部署方法 |
+| [性能测试指南 (PERFORMANCE_TEST.md)](./PERFORMANCE_TEST.md) | 性能基准测试方法和指标说明 |
+| [集成测试文档 (tests/integration_test.md)](./tests/integration_test.md) | 端到端测试用例和测试流程 |
 
 ---
 
@@ -324,6 +339,24 @@ C:\Users\[用户名]\AppData\Roaming\com.prism.local-server\config.json
 ### v2.x (Python + Flet)
 - 基于 Python + Flet 的原始版本
 - 已废弃，建议升级到 v3.0.0
+
+---
+
+## 🌿 分支策略
+
+本项目采用以下分支管理策略：
+
+| 分支 | 用途 | 说明 |
+|------|------|------|
+| `tauri-v3` | 日常开发分支 | Bug 修复、小优化、功能迭代 |
+| `main` | 稳定发布分支 | 仅在发布新版本时从 tauri-v3 合并 |
+| `flet` | 历史版本分支 | 保留 Python/Flet 版本代码（v2.x） |
+
+**开发流程**:
+1. 所有开发工作在 `tauri-v3` 分支进行
+2. 功能完成并测试通过后，提交到 `tauri-v3`
+3. 准备发布时，将 `tauri-v3` 合并到 `main` 并打 Tag
+4. 从 `main` 分支创建 GitHub Release
 
 ---
 
