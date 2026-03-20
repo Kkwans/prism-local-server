@@ -1,5 +1,17 @@
 # Prism Local Server (棱镜本地服务器)
 
+> **⚠️ 版本声明：v1 版本 - 已废弃，不再开发**
+> 
+> 本分支为 v1 历史版本归档（基于 Python + CustomTkinter），已停止维护和功能开发。
+> 
+> 请使用最新的 v3 版本（基于 Tauri v2 + Rust + React），获得更好的性能和用户体验。
+> 
+> - **v3 版本仓库**：[prism-local-server-tauri](https://github.com/Kkwans/prism-local-server)（main 分支）
+> - **技术栈升级**：Python → Rust（后端）+ React（前端）
+> - **性能提升**：内存占用减少 70%，启动速度提升 3 倍，包体积减少 80%
+
+---
+
 一个Windows 11桌面应用程序，用于快速将HTML静态文件部署到本地HTTP服务器，支持本地访问和局域网访问。
 
 ## 功能特性
