@@ -4,6 +4,7 @@ use crate::errors::ServerError;
 use crate::models::{ServerConfig, ServerInfo, ServerStatus};
 use crate::server::handler::handle_static_file;
 use crate::server::namer::ServiceNamer;
+use crate::server::data_share::{DataShareLayer, SharedData};
 use crate::utils::network::get_primary_lan_ip;
 use crate::utils::port::{check_port_availability, find_available_port};
 use axum::Router;
@@ -31,15 +32,32 @@ pub struct ServerManager {
     servers: Arc<RwLock<HashMap<String, ServerInstance>>>,
     /// 服务命名器
     namer: ServiceNamer,
+    /// 数据共享层
+    data_share: Arc<DataShareLayer>,
 }
 
 impl ServerManager {
     /// 创建新的服务管理器
     pub fn new() -> Self {
+        let data_share = DataShareLayer::new()
+            .expect("无法初始化数据共享层");
+        
         Self {
             servers: Arc::new(RwLock::new(HashMap::new())),
             namer: ServiceNamer::new(),
+            data_share: Arc::new(data_share),
         }
+    }
+    
+    /// 从共享数据初始化服务列表
+    pub async fn init_from_shared_data(&self) -> Result<(), ServerError> {
+        let shared_data = self.data_share.read_shared_data().await?;
+        
+        // 注意：这里只读取共享数据用于显示
+        // 实际的服务进程由各自的应用实例管理
+        log::info!("从共享数据加载了 {} 个服务", shared_data.servers.len());
+        
+        Ok(())
     }
 
     /// 启动服务器
@@ -104,6 +122,22 @@ impl ServerManager {
 
         let mut servers = self.servers.write().await;
         servers.insert(server_id, instance);
+        
+        // 同步到共享数据
+        let all_servers: Vec<ServerInfo> = servers.values()
+            .map(|inst| inst.info.clone())
+            .collect();
+        drop(servers); // 释放锁
+        
+        let shared_data = SharedData {
+            servers: all_servers,
+            last_update: chrono::Utc::now().timestamp_millis(),
+            instance_id: self.data_share.get_instance_id().to_string(),
+        };
+        
+        if let Err(e) = self.data_share.write_shared_data(&shared_data).await {
+            log::warn!("写入共享数据失败: {}", e);
+        }
 
         Ok(server_info)
     }
@@ -123,6 +157,22 @@ impl ServerManager {
 
         // 中止任务
         instance.task_handle.abort();
+        
+        // 同步到共享数据
+        let all_servers: Vec<ServerInfo> = servers.values()
+            .map(|inst| inst.info.clone())
+            .collect();
+        drop(servers); // 释放锁
+        
+        let shared_data = SharedData {
+            servers: all_servers,
+            last_update: chrono::Utc::now().timestamp_millis(),
+            instance_id: self.data_share.get_instance_id().to_string(),
+        };
+        
+        if let Err(e) = self.data_share.write_shared_data(&shared_data).await {
+            log::warn!("写入共享数据失败: {}", e);
+        }
 
         Ok(())
     }

@@ -40,6 +40,10 @@ pub enum ServerError {
     #[error("服务停止失败: {0}")]
     StopFailed(String),
     
+    /// 数据共享错误
+    #[error("数据共享错误: {0}")]
+    DataShareError(String),
+    
     /// IO 错误
     #[error("IO 错误: {0}")]
     IoError(#[from] std::io::Error),

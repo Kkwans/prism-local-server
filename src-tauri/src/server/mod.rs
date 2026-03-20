@@ -5,3 +5,4 @@ pub mod range;
 pub mod handler;
 pub mod manager;
 pub mod namer;
+pub mod data_share;
