@@ -3,7 +3,7 @@
 $ErrorActionPreference = "Stop"
 
 # 获取版本号
-$cargoToml = Get-Content "src-tauri/Cargo.toml" -Raw
+$cargoToml = Get-Content "backend/Cargo.toml" -Raw
 if ($cargoToml -match 'version\s*=\s*"([^"]+)"') {
     $version = $matches[1]
 } else {
@@ -11,7 +11,7 @@ if ($cargoToml -match 'version\s*=\s*"([^"]+)"') {
 }
 
 # 源文件路径
-$sourceExe = "src-tauri/target/release/prism-local-server-tauri.exe"
+$sourceExe = "backend/target/release/prism-local-server-tauri.exe"
 
 # 目标文件路径
 $targetExe = "prism-local-server-v$version.exe"
